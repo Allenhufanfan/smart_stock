@@ -9,8 +9,8 @@ uses
   IdComponent, IdTCPConnection, IdTCPClient, Vcl.StdCtrls, IdHTTP, DateUtils,
   qstring, qjson, Vcl.ComCtrls, Vcl.ExtCtrls, cxGraphics, cxControls, dxNavBar,
   dxNavBarBase, dxNavBarCollns, cxLookAndFeels, cxLookAndFeelPainters,
-  dxStatusBar, dxBarBuiltInMenu, cxPC, Vcl.Menus, Vcl.Grids, StrUtils, Vcl.OleCtrls,
-  SHDocVw, SHDocVw_EWB, EwbCore, EmbeddedWB,EwbTools;
+  dxStatusBar, dxBarBuiltInMenu, cxPC, Vcl.Menus, Vcl.Grids, StrUtils, dxBar,
+  cxClasses, Vcl.OleCtrls, SHDocVw;
 
 type
   // 建立一个获取行情数据的线程
@@ -33,19 +33,12 @@ type
 type
   TFrm_stockhq = class(TForm)
     Strgrid_stock: TStringGrid;
-    bbStart: TButton;
-    bbStop: TButton;
     IdHTTP1: TIdHTTP;
-    edt_fresh: TEdit;
-    lbl: TLabel;
     TrayIcon1: TTrayIcon;
     PopupMenu1: TPopupMenu;
     Exit1: TMenuItem;
     StringGrid_wudang: TStringGrid;
     lbl_stock: TLabel;
-    cxPageControl: TcxPageControl;
-    cxTab_hq: TcxTabSheet;
-    cxTab_smart: TcxTabSheet;
     nbMain: TdxNavBar;
     Panel1: TPanel;
     ListView1: TListView;
@@ -56,17 +49,45 @@ type
     Label2: TLabel;
     IdSSLIOHandlerSocketOpenSSL1: TIdSSLIOHandlerSocketOpenSSL;
     Timer1: TTimer;
-    dxStatusBar1: TdxStatusBar;
-    Panel4: TPanel;
+    dxStatusBar: TdxStatusBar;
     Panel5: TPanel;
     Panel6: TPanel;
+    dxBarManager: TdxBarManager;
+    dxBarManager1Bar1: TdxBar;
+    dxBarBtn_stock: TdxBarLargeButton;
+    dxBarBtn_smart: TdxBarLargeButton;
+    dxBarBtn_refresh: TdxBarLargeButton;
+    dxBarBtn_set: TdxBarLargeButton;
+    cxPageControl: TcxPageControl;
+    cxTab_stock: TcxTabSheet;
+    cxTab_Smart: TcxTabSheet;
+    cxTab_set: TcxTabSheet;
+    Panel4: TPanel;
+    lbl: TLabel;
+    bbStart: TButton;
+    bbStop: TButton;
+    edt_fresh: TEdit;
     Panel7: TPanel;
-    EmbeddedWB1: TEmbeddedWB;
+    dxBarButton1: TdxBarButton;
+    dxBarButton2: TdxBarButton;
+    dxBarSubItem1: TdxBarSubItem;
+    dxBarLargeButton1: TdxBarLargeButton;
+    WebBrowser: TWebBrowser;
+    Panel8: TPanel;
+    btn_min: TButton;
+    btn_day: TButton;
+    Button3: TButton;
+    btn_close: TButton;
+    Panel9: TPanel;
+    Check_Kflag: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure bbStartClick(Sender: TObject);
     procedure bbStopClick(Sender: TObject);
-    procedure EmbeddedWB1Click(Sender: TObject; Button: TMouseButton; Shift:
-        TShiftState; X, Y: Integer);
+    procedure btn_closeClick(Sender: TObject);
+    procedure btn_dayClick(Sender: TObject);
+    procedure btn_minClick(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
+    procedure dxBarBtn_refreshClick(Sender: TObject);
     procedure Exit1Click(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure FormShow(Sender: TObject);
@@ -76,6 +97,10 @@ type
     procedure StringGrid_wudangDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
     procedure Timer1Timer(Sender: TObject);
     procedure TrayIcon1DblClick(Sender: TObject);
+    procedure dxBarBtn_stockClick(Sender: TObject);
+    procedure dxBarBtn_smartClick(Sender: TObject);
+    procedure dxBarBtn_setClick(Sender: TObject);
+    procedure WebBrowserEnter(Sender: TObject);
   private
     { Private declarations }
   public
@@ -87,6 +112,7 @@ type
     bFirst_Select: Boolean;
     procedure bt_status(Fstatus: Boolean);
     procedure CreateNav(sType: string; Ajson: TQJson);
+    procedure GetChart(sUrl: string; flag: Integer);
     function GetHTML(Url: string): string;
     procedure GetStock(Url: string);
     procedure GetStockType;
@@ -96,8 +122,6 @@ type
     function UnicodeToChinese(inputstr: string): string; overload;
     procedure Updlistview(Ajson: TQJson);
     procedure WMSysCommand(var msg: TMessage); message WM_SYSCOMMAND;
-    procedure GetChart();
-
     { Public declarations }
   end;
 
@@ -144,7 +168,7 @@ begin
   StringGrid_wudang.Cells[0, 10] := '买五';
 
   bt_status(False);
-  cxPageControl.ActivePage := cxTab_hq;
+  cxPageControl.ActivePage := cxTab_stock;
   ListView1.Clear;
 
   ListView1.Columns.Clear;
@@ -166,6 +190,7 @@ begin
   Listview1.ViewStyle := vsreport;
   Listview1.GridLines := False;
 
+  lbl_stock.Font.Color := RGB(0,85,162);
   GetStockType;
 end;
 
@@ -199,11 +224,12 @@ begin
     else
       Fstockname_strs[i] := 'sh' + Fstockname_strs[i];
   end;
-  //默认加入上证指数
-  Strgrid_stock.Cells[1, Fstockname_strs.Count + 1] := '000001';
-  Fstockname_strs.Add('sh000001');
+
   Strgrid_stock.RowCount := Fstockname_strs.Count + 1;
 
+  Fstockname_strs.Add('sh000001'); //上证指数
+  Fstockname_strs.Add('sz399001'); //深圳指数
+  Fstockname_strs.Add('sz399006'); //创业板指数
   FStock_thread := TRevThread.Create(Fstockname_strs, StrToInt(edt_fresh.Text));
   FStock_thread.FreeOnTerminate := True;
   FStock_thread.Resume;
@@ -223,6 +249,21 @@ begin
   bt_status(False);
 end;
 
+procedure TFrm_stockhq.btn_closeClick(Sender: TObject);
+begin
+  Panel7.Visible := False;
+end;
+
+procedure TFrm_stockhq.btn_dayClick(Sender: TObject);
+begin
+  GetChart(FSelect_stock, 2);
+end;
+
+procedure TFrm_stockhq.btn_minClick(Sender: TObject);
+begin
+  GetChart(FSelect_stock, 1);
+end;
+
 procedure TFrm_stockhq.bt_status(Fstatus: Boolean);
 begin
   if Fstatus then
@@ -237,6 +278,11 @@ begin
     bbStop.Enabled := False;
     edt_fresh.Enabled := True;
   end;
+end;
+
+procedure TFrm_stockhq.Button3Click(Sender: TObject);
+begin
+  GetChart(FSelect_stock, 3);
 end;
 
 procedure TFrm_stockhq.CreateNav(sType: string; Ajson: TQJson);
@@ -273,10 +319,27 @@ begin
   end;
 end;
 
-procedure TFrm_stockhq.EmbeddedWB1Click(Sender: TObject; Button: TMouseButton;
-    Shift: TShiftState; X, Y: Integer);
+procedure TFrm_stockhq.dxBarBtn_refreshClick(Sender: TObject);
 begin
-  Panel7.Visible := False;
+  nbMain.Items.Clear;
+  GetStockType;
+  bbStop.OnClick(Sender);
+  bbStart.OnClick(Sender);
+end;
+
+procedure TFrm_stockhq.dxBarBtn_setClick(Sender: TObject);
+begin
+  cxPageControl.ActivePage := cxTab_set;
+end;
+
+procedure TFrm_stockhq.dxBarBtn_smartClick(Sender: TObject);
+begin
+  cxPageControl.ActivePage := cxTab_Smart;
+end;
+
+procedure TFrm_stockhq.dxBarBtn_stockClick(Sender: TObject);
+begin
+  cxPageControl.ActivePage := cxTab_stock;
 end;
 
 procedure TFrm_stockhq.Exit1Click(Sender: TObject);
@@ -323,16 +386,22 @@ begin
 }
 end;
 
-procedure TFrm_stockhq.GetChart;
-var
-  Url: string;
+procedure TFrm_stockhq.GetChart(sUrl: string; flag: Integer);
 begin
-  if StrToInt(FSelect_stock) < 600000 then
-    Url := 'sz' + FSelect_stock
+  if StrToInt(sUrl) < 60000 then
+    //sUrl := 'http://image.sinajs.cn/newchart/min/n/sz' + sUrl + '.gif'
+    sUrl := 'sz' + sUrl
   else
-    Url := 'sh' + FSelect_stock;
-  EmbeddedWB1.Navigate('http://image.sinajs.cn/newchart/min/n/' + Url + '.gif');
-  Panel7.Visible := True;
+    sUrl := 'sh' + sUrl;
+    //sUrl := 'http://image.sinajs.cn/newchart/min/n/sh' + sUrl + '.gif';
+  if flag = 1 then    //分时图
+    sUrl := 'http://image.sinajs.cn/newchart/min/n/' + sUrl + '.gif'
+  else if flag = 2 then   //日K
+    sUrl := 'http://image.sinajs.cn/newchart/daily/' + sUrl + '.gif'
+  else  //周K
+    sUrl := 'http://image.sinajs.cn/newchart/weekly/n/' + sUrl + '.gif';
+
+  WebBrowser.Navigate(sUrl);
 end;
 
 function TFrm_stockhq.GetHTML(Url: string): string;
@@ -476,8 +545,15 @@ var
   Rowindex: integer;
 begin
   Rowindex := Strgrid_stock.Row; //获取行索引
-  FSelect_stock := Strgrid_stock.Cells[1, Rowindex];
-  GetChart;
+  if Rowindex > 0 then
+  begin
+    FSelect_stock := Strgrid_stock.Cells[1, Rowindex];
+    if Check_Kflag.Checked then
+    begin
+      Panel7.Visible := True;
+      GetChart(FSelect_stock, 1);
+    end;
+  end;
 end;
 
 procedure TFrm_stockhq.Strgrid_stockDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
@@ -631,6 +707,11 @@ begin
   end;
 end;
 
+procedure TFrm_stockhq.WebBrowserEnter(Sender: TObject);
+begin
+  Panel7.Visible := False;
+end;
+
 procedure TFrm_stockhq.WMSysCommand(var msg: TMessage);
 begin
   inherited;
@@ -710,12 +791,16 @@ procedure TRevThread.UpdateGrid;
 
 var
   Change_percent: string;
+  Current_Price : string;
+  Yest_Price : string;
   Change_amt: Double;
   Change_flag: string;
 begin
+  Current_Price := Format('%.2f', [StrToFloat(Fstocprice_strs[3])]);  //当前价格
+  Yest_Price := Format('%.2f', [StrToFloat(Fstocprice_strs[2])]);  //昨日价格
   Frm_stockhq.Strgrid_stock.Cells[2, ncolumn + 1] := Fstocprice_strs[0];  //股票名称
-  Frm_stockhq.Strgrid_stock.Cells[3, ncolumn + 1] := Format('%.2f', [StrToFloat(Fstocprice_strs[3])]);  //当前价格
-  Frm_stockhq.Strgrid_stock.Cells[6, ncolumn + 1] := Format('%.2f', [StrToFloat(Fstocprice_strs[2])]);  //昨日价格
+  Frm_stockhq.Strgrid_stock.Cells[3, ncolumn + 1] := Current_Price;  //当前价格
+  Frm_stockhq.Strgrid_stock.Cells[6, ncolumn + 1] := Yest_Price;  //昨日价格
   Change_amt := StrToFloat(Fstocprice_strs[3]) - StrToFloat(Fstocprice_strs[2]);
   if (Change_amt > 0) then
     Change_flag := '+';
@@ -726,7 +811,7 @@ begin
   //更新五档行情
   if Frm_stockhq.FSelect_stock = Fthread_stock then
   begin
-    Frm_stockhq.lbl_stock.Caption := Fstocprice_strs[0] + #10 + Frm_stockhq.FSelect_stock;
+    Frm_stockhq.lbl_stock.Caption := Fstocprice_strs[0] + '(' + Frm_stockhq.FSelect_stock + ')';
     Frm_stockhq.FSelect_stock_price := Fstocprice_strs[2];
 
     //五档笔数  股数/100
@@ -752,6 +837,32 @@ begin
     Frm_stockhq.StringGrid_wudang.Cells[1, 3] := Fstocprice_strs[25]; //卖三价格
     Frm_stockhq.StringGrid_wudang.Cells[1, 4] := Fstocprice_strs[23]; //卖二价格
     Frm_stockhq.StringGrid_wudang.Cells[1, 5] := Fstocprice_strs[21]; //卖一价格
+  end;
+
+  //更新指数
+  if Fthread_stock = '000001' then      //上证指数
+  begin
+    Frm_stockhq.dxStatusBar.Panels[1].Text := Current_Price + ' ' + Change_percent;
+    if (Change_amt > 0) then
+      Frm_stockhq.dxStatusBar.Panels[1].PanelStyle.Font.Color := clRed
+    else if (Change_amt < 0) then
+      Frm_stockhq.dxStatusBar.Panels[1].PanelStyle.Font.Color := clBlue;
+  end
+  else if Fthread_stock = '399001' then //深圳指数
+  begin
+    Frm_stockhq.dxStatusBar.Panels[3].Text := Current_Price + ' ' + Change_percent;
+    if (Change_amt > 0) then
+      Frm_stockhq.dxStatusBar.Panels[3].PanelStyle.Font.Color := clRed
+    else if (Change_amt < 0) then
+      Frm_stockhq.dxStatusBar.Panels[3].PanelStyle.Font.Color := clBlue;
+  end
+  else if Fthread_stock = '399006' then //创业板指数
+  begin
+    Frm_stockhq.dxStatusBar.Panels[5].Text := Current_Price + ' ' + Change_percent;
+    if (Change_amt > 0) then
+      Frm_stockhq.dxStatusBar.Panels[5].PanelStyle.Font.Color := clRed
+    else if (Change_amt < 0) then
+      Frm_stockhq.dxStatusBar.Panels[5].PanelStyle.Font.Color := clBlue;
   end;
 end;
 
