@@ -90,7 +90,6 @@ type
     procedure dxBarBtn_refreshClick(Sender: TObject);
     procedure Exit1Click(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-    procedure FormShow(Sender: TObject);
     procedure ListView1CustomDrawItem(Sender: TCustomListView; Item: TListItem; State: TCustomDrawState; var DefaultDraw: Boolean);
     procedure Strgrid_stockClick(Sender: TObject);
     procedure Strgrid_stockDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
@@ -100,8 +99,6 @@ type
     procedure dxBarBtn_stockClick(Sender: TObject);
     procedure dxBarBtn_smartClick(Sender: TObject);
     procedure dxBarBtn_setClick(Sender: TObject);
-    procedure Strgrid_stockSelectCell(Sender: TObject; ACol, ARow: Integer; var
-        CanSelect: Boolean);
     procedure WebBrowserEnter(Sender: TObject);
   private
     { Private declarations }
@@ -153,7 +150,7 @@ begin
   Strgrid_stock.ColWidths[1] := 60;
   Strgrid_stock.ColWidths[4] := 120;
   Strgrid_stock.ColWidths[5] := 100;
-  Strgrid_stock.ColWidths[0] := -1;
+  Strgrid_stock.ColWidths[0] := 0;
   Strgrid_stock.ColWidths[6] := -1;
 
   //五档行情
@@ -359,36 +356,6 @@ begin
   CanClose := False;
 end;
 
-procedure TFrm_stockhq.FormShow(Sender: TObject);
-var
-  i: Integer;
-begin
-{
-  ListView1.Clear;
-
-  ListView1.Columns.Clear;
-  for i := 0 to 6 do
-  begin
-    ListView1.Columns.Add;
-    ListView1.Columns.Items[i].Width := 100;
-    ListView1.Columns.Items[i].Alignment := taCenter;
-  end;
-  ListView1.Columns.Items[1].Caption := '代码';
-  ListView1.Columns.Items[2].Caption := '名称';
-  ListView1.Columns.Items[3].Caption := '当前价';
-  ListView1.Columns.Items[4].Caption := '涨跌幅';
-  ListView1.Columns.Items[5].Caption := '涨跌幅1';
-  ListView1.Columns.Items[6].Caption := '入选时间';
-  ListView1.Columns.Items[6].Width := 150;
-  ListView1.Columns.Items[0].Width := 0;
-  ListView1.Columns.Items[5].Width := 0;
-  Listview1.ViewStyle := vsreport;
-  Listview1.GridLines := False;
-
-  GetStockType;
-}
-end;
-
 procedure TFrm_stockhq.GetChart(sUrl: string; flag: Integer);
 begin
   if StrToInt(sUrl) < 600000 then
@@ -540,7 +507,7 @@ begin
   if StrToFloat(Item.SubItems.Strings[4]) > 0 then
     item.listview.Canvas.Font.Color := clRed
   else if (StrToFloat(Item.SubItems.Strings[4]) < 0) then
-    item.listview.Canvas.Font.Color := clBlue;
+    item.listview.Canvas.Font.Color := clGreen;
 end;
 
 procedure TFrm_stockhq.Strgrid_stockClick(Sender: TObject);
@@ -569,15 +536,17 @@ begin
 
   with Strgrid_stock.Canvas do
   begin
-    if gdSelected in State then Brush.Color := RGB(203,226,253) else Brush.Color := clWhite;
+    if (gdSelected in State) then Brush.Color := RGB(203,226,253) else Brush.Color := clWhite;
     FillRect(Rect);
-    Pen.Width := 0;
+    Pen.Width := 1;
     Pen.Color := clWhite;
     Rectangle(r);
 
     Font.Size := 10;
     Font.Name := '微软雅黑';
-    if (ARow > 0) and (Acol <> 5) and (Acol <> 1) then
+    //Font.Style := [fsBold];
+    //if (ARow > 0) and (Acol <> 5) and (Acol <> 1) then
+    if (ARow > 0)then
     begin
       if (Strgrid_stock.Cells[4, ARow] <> '') and (CompareStr(Strgrid_stock.Cells[3, ARow], Strgrid_stock.Cells[6, ARow]) > 0) then
         Font.Color := clred //涨|字体颜色为红的
@@ -585,42 +554,9 @@ begin
         Font.Color := clGreen; //跌|字体颜色为绿的
     end
     else
-      Canvas.Font.Color := clBlack;
-
+      Font.Color := clBlack;
     TextRect(Rect, Str, [tfCenter, tfVerticalCenter, tfSingleLine]);
   end;
- {
-  with Strgrid_stock do
-  begin
-    Canvas.Font.Size := 10;
-    Canvas.Font.Name := '微软雅黑';
-    if (ARow > 0) and (Acol <> 5) and (Acol <> 1) then
-    begin
-      if (Cells[4, ARow] <> '') and (CompareStr(Cells[3, ARow], Strgrid_stock.Cells[6, ARow]) > 0) then
-        Canvas.Font.Color := clred //涨|字体颜色为红的
-      else
-        Canvas.Font.Color := clGreen; //跌|字体颜色为绿的
-    end
-    else
-      Canvas.Font.Color := clBlack;
-   Canvas.FillRect(Rect);  //绘底色
-   canvas.textout(rect.Left,rect.Top,cells[Acol,ARow]); //output text
-    //DrawText(Canvas.Handle, PChar(Str), Length(Str), Rect, DT_CENTER or DT_SINGLELINE or DT_VCENTER); //文字居中
-  end;
- }
-end;
-
-procedure TFrm_stockhq.Strgrid_stockSelectCell(Sender: TObject; ACol, ARow:
-    Integer; var CanSelect: Boolean);
-var
-  r: TRect;
-begin
-//  r := Strgrid_stock.CellRect(ACol, ARow);
-//  with Strgrid_stock.Canvas do
-//  begin
-//    Brush.Color := clBlack;
-//    FillRect(r);
-//  end;
 end;
 
 procedure TFrm_stockhq.StringGrid_wudangDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
@@ -889,7 +825,7 @@ begin
     if (Change_amt > 0) then
       Frm_stockhq.dxStatusBar.Panels[1].PanelStyle.Font.Color := clRed
     else if (Change_amt < 0) then
-      Frm_stockhq.dxStatusBar.Panels[1].PanelStyle.Font.Color := clBlue;
+      Frm_stockhq.dxStatusBar.Panels[1].PanelStyle.Font.Color := clGreen;
   end
   else if Fthread_stock = '399001' then //深圳指数
   begin
@@ -897,7 +833,7 @@ begin
     if (Change_amt > 0) then
       Frm_stockhq.dxStatusBar.Panels[3].PanelStyle.Font.Color := clRed
     else if (Change_amt < 0) then
-      Frm_stockhq.dxStatusBar.Panels[3].PanelStyle.Font.Color := clBlue;
+      Frm_stockhq.dxStatusBar.Panels[3].PanelStyle.Font.Color := clGreen;
   end
   else if Fthread_stock = '399006' then //创业板指数
   begin
@@ -905,7 +841,7 @@ begin
     if (Change_amt > 0) then
       Frm_stockhq.dxStatusBar.Panels[5].PanelStyle.Font.Color := clRed
     else if (Change_amt < 0) then
-      Frm_stockhq.dxStatusBar.Panels[5].PanelStyle.Font.Color := clBlue;
+      Frm_stockhq.dxStatusBar.Panels[5].PanelStyle.Font.Color := clGreen;
   end;
 end;
 

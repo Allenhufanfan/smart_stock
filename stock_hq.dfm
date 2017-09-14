@@ -15,7 +15,6 @@ object Frm_stockhq: TFrm_stockhq
   Position = poDesktopCenter
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
-  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object dxStatusBar: TdxStatusBar
@@ -101,58 +100,57 @@ object Frm_stockhq: TFrm_stockhq
     Height = 554
     Align = alClient
     TabOrder = 5
-    Properties.ActivePage = cxTab_stock
     Properties.CustomButtons.Buttons = <>
     ClientRectBottom = 550
     ClientRectLeft = 4
     ClientRectRight = 774
-    ClientRectTop = 24
+    ClientRectTop = 4
     object cxTab_stock: TcxTabSheet
       Caption = #33258#36873#32929
       ImageIndex = 0
+      TabVisible = False
+      ExplicitTop = 24
+      ExplicitHeight = 526
       object Panel5: TPanel
         Left = 0
         Top = 0
         Width = 770
-        Height = 526
+        Height = 546
         Align = alClient
         TabOrder = 0
+        ExplicitHeight = 526
         object Strgrid_stock: TStringGrid
           Left = 1
           Top = 1
           Width = 544
-          Height = 295
+          Height = 315
           Margins.Right = 1
           Align = alClient
           ColCount = 4
           DefaultColWidth = 90
-          FixedCols = 0
-          RowCount = 1
-          FixedRows = 0
+          DefaultDrawing = False
+          RowCount = 2
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clBlack
           Font.Height = -16
           Font.Name = 'Tahoma'
           Font.Style = []
           GridLineWidth = 0
-          Options = [goDrawFocusSelected, goRowSelect]
+          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goRowSelect]
           ParentFont = False
           TabOrder = 0
           OnClick = Strgrid_stockClick
           OnDrawCell = Strgrid_stockDrawCell
-          OnSelectCell = Strgrid_stockSelectCell
-          ExplicitLeft = 4
-          ExplicitTop = 4
-          ExplicitWidth = 538
-          ExplicitHeight = 289
+          ExplicitHeight = 295
         end
         object Panel6: TPanel
           Left = 545
           Top = 1
           Width = 224
-          Height = 295
+          Height = 315
           Align = alRight
           TabOrder = 1
+          ExplicitHeight = 295
           object lbl_stock: TLabel
             AlignWithMargins = True
             Left = 4
@@ -204,12 +202,13 @@ object Frm_stockhq: TFrm_stockhq
         end
         object Panel7: TPanel
           Left = 1
-          Top = 296
+          Top = 316
           Width = 768
           Height = 229
           Align = alBottom
           TabOrder = 2
           Visible = False
+          ExplicitTop = 296
           object Panel8: TPanel
             Left = 1
             Top = 1
@@ -285,22 +284,26 @@ object Frm_stockhq: TFrm_stockhq
     object cxTab_Smart: TcxTabSheet
       Caption = #36873#32929#31574#30053
       ImageIndex = 1
+      TabVisible = False
+      ExplicitTop = 24
+      ExplicitHeight = 526
       object nbMain: TdxNavBar
         Left = 0
         Top = 0
         Width = 158
-        Height = 526
+        Height = 546
         Align = alLeft
         Constraints.MinWidth = 120
         ActiveGroupIndex = -1
         TabOrder = 0
         View = 16
+        ExplicitHeight = 526
       end
       object Panel1: TPanel
         Left = 158
         Top = 0
         Width = 612
-        Height = 526
+        Height = 546
         Align = alClient
         Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
@@ -309,11 +312,12 @@ object Frm_stockhq: TFrm_stockhq
         Font.Style = []
         ParentFont = False
         TabOrder = 1
+        ExplicitHeight = 526
         object ListView1: TListView
           Left = 1
           Top = 1
           Width = 610
-          Height = 459
+          Height = 479
           Align = alClient
           Columns = <
             item
@@ -324,16 +328,18 @@ object Frm_stockhq: TFrm_stockhq
           RowSelect = True
           TabOrder = 0
           OnCustomDrawItem = ListView1CustomDrawItem
+          ExplicitHeight = 459
         end
         object Panel2: TPanel
           Left = 1
-          Top = 460
+          Top = 480
           Width = 610
           Height = 65
           Align = alBottom
           BevelOuter = bvNone
           BorderStyle = bsSingle
           TabOrder = 1
+          ExplicitTop = 460
           object StaticText1: TStaticText
             Left = 81
             Top = 0
@@ -414,6 +420,9 @@ object Frm_stockhq: TFrm_stockhq
     object cxTab_set: TcxTabSheet
       Caption = #31995#32479#35774#32622
       ImageIndex = 2
+      TabVisible = False
+      ExplicitTop = 24
+      ExplicitHeight = 526
       object Panel4: TPanel
         Left = 3
         Top = 3
