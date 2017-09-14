@@ -26,30 +26,66 @@ object Frm_stockhq: TFrm_stockhq
     Panels = <
       item
         PanelStyleClassName = 'TdxStatusBarTextPanelStyle'
+        PanelStyle.Font.Charset = DEFAULT_CHARSET
+        PanelStyle.Font.Color = clWindowText
+        PanelStyle.Font.Height = -11
+        PanelStyle.Font.Name = 'Tahoma'
+        PanelStyle.Font.Style = [fsBold]
+        PanelStyle.ParentFont = False
         Text = #19978#35777#25351#25968#65306
         Width = 60
       end
       item
         PanelStyleClassName = 'TdxStatusBarTextPanelStyle'
-        Width = 140
+        PanelStyle.Font.Charset = DEFAULT_CHARSET
+        PanelStyle.Font.Color = clWindowText
+        PanelStyle.Font.Height = -11
+        PanelStyle.Font.Name = 'Tahoma'
+        PanelStyle.Font.Style = [fsBold]
+        PanelStyle.ParentFont = False
+        Width = 145
       end
       item
         PanelStyleClassName = 'TdxStatusBarTextPanelStyle'
+        PanelStyle.Font.Charset = DEFAULT_CHARSET
+        PanelStyle.Font.Color = clWindowText
+        PanelStyle.Font.Height = -11
+        PanelStyle.Font.Name = 'Tahoma'
+        PanelStyle.Font.Style = [fsBold]
+        PanelStyle.ParentFont = False
         Text = #28145#22323#25351#25968#65306
         Width = 60
       end
       item
         PanelStyleClassName = 'TdxStatusBarTextPanelStyle'
-        Width = 140
+        PanelStyle.Font.Charset = DEFAULT_CHARSET
+        PanelStyle.Font.Color = clWindowText
+        PanelStyle.Font.Height = -11
+        PanelStyle.Font.Name = 'Tahoma'
+        PanelStyle.Font.Style = [fsBold]
+        PanelStyle.ParentFont = False
+        Width = 145
       end
       item
         PanelStyleClassName = 'TdxStatusBarTextPanelStyle'
+        PanelStyle.Font.Charset = DEFAULT_CHARSET
+        PanelStyle.Font.Color = clWindowText
+        PanelStyle.Font.Height = -11
+        PanelStyle.Font.Name = 'Tahoma'
+        PanelStyle.Font.Style = [fsBold]
+        PanelStyle.ParentFont = False
         Text = #21019#19994#26495#25351#65306
         Width = 60
       end
       item
         PanelStyleClassName = 'TdxStatusBarTextPanelStyle'
-        Width = 140
+        PanelStyle.Font.Charset = DEFAULT_CHARSET
+        PanelStyle.Font.Color = clWindowText
+        PanelStyle.Font.Height = -11
+        PanelStyle.Font.Name = 'Tahoma'
+        PanelStyle.Font.Style = [fsBold]
+        PanelStyle.ParentFont = False
+        Width = 145
       end>
     PaintStyle = stpsUseLookAndFeel
     Font.Charset = DEFAULT_CHARSET
@@ -74,8 +110,6 @@ object Frm_stockhq: TFrm_stockhq
     object cxTab_stock: TcxTabSheet
       Caption = #33258#36873#32929
       ImageIndex = 0
-      ExplicitTop = 4
-      ExplicitHeight = 546
       object Panel5: TPanel
         Left = 0
         Top = 0
@@ -83,33 +117,34 @@ object Frm_stockhq: TFrm_stockhq
         Height = 526
         Align = alClient
         TabOrder = 0
-        ExplicitHeight = 546
         object Strgrid_stock: TStringGrid
-          AlignWithMargins = True
-          Left = 4
-          Top = 4
-          Width = 538
-          Height = 289
+          Left = 1
+          Top = 1
+          Width = 544
+          Height = 295
+          Margins.Right = 1
           Align = alClient
           ColCount = 4
           DefaultColWidth = 90
-          DefaultDrawing = False
+          FixedCols = 0
           RowCount = 1
           FixedRows = 0
           Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
+          Font.Color = clBlack
           Font.Height = -16
           Font.Name = 'Tahoma'
           Font.Style = []
-          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRowSelect]
+          GridLineWidth = 0
+          Options = [goDrawFocusSelected, goRowSelect]
           ParentFont = False
           TabOrder = 0
           OnClick = Strgrid_stockClick
           OnDrawCell = Strgrid_stockDrawCell
-          ExplicitLeft = 1
-          ExplicitTop = 1
-          ExplicitWidth = 544
-          ExplicitHeight = 315
+          OnSelectCell = Strgrid_stockSelectCell
+          ExplicitLeft = 4
+          ExplicitTop = 4
+          ExplicitWidth = 538
+          ExplicitHeight = 289
         end
         object Panel6: TPanel
           Left = 545
@@ -118,7 +153,6 @@ object Frm_stockhq: TFrm_stockhq
           Height = 295
           Align = alRight
           TabOrder = 1
-          ExplicitHeight = 315
           object lbl_stock: TLabel
             AlignWithMargins = True
             Left = 4
@@ -176,7 +210,6 @@ object Frm_stockhq: TFrm_stockhq
           Align = alBottom
           TabOrder = 2
           Visible = False
-          ExplicitTop = 316
           object Panel8: TPanel
             Left = 1
             Top = 1
@@ -252,7 +285,6 @@ object Frm_stockhq: TFrm_stockhq
     object cxTab_Smart: TcxTabSheet
       Caption = #36873#32929#31574#30053
       ImageIndex = 1
-      TabVisible = False
       object nbMain: TdxNavBar
         Left = 0
         Top = 0
@@ -288,6 +320,8 @@ object Frm_stockhq: TFrm_stockhq
             end
             item
             end>
+          HideSelection = False
+          RowSelect = True
           TabOrder = 0
           OnCustomDrawItem = ListView1CustomDrawItem
         end
@@ -380,9 +414,6 @@ object Frm_stockhq: TFrm_stockhq
     object cxTab_set: TcxTabSheet
       Caption = #31995#32479#35774#32622
       ImageIndex = 2
-      TabVisible = False
-      ExplicitTop = 4
-      ExplicitHeight = 546
       object Panel4: TPanel
         Left = 3
         Top = 3

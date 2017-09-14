@@ -1,4 +1,4 @@
-unit stock_hq;
+﻿unit stock_hq;
 
 interface
 
@@ -100,6 +100,8 @@ type
     procedure dxBarBtn_stockClick(Sender: TObject);
     procedure dxBarBtn_smartClick(Sender: TObject);
     procedure dxBarBtn_setClick(Sender: TObject);
+    procedure Strgrid_stockSelectCell(Sender: TObject; ACol, ARow: Integer; var
+        CanSelect: Boolean);
     procedure WebBrowserEnter(Sender: TObject);
   private
     { Private declarations }
@@ -134,13 +136,14 @@ implementation
 
 procedure TFrm_stockhq.FormCreate(Sender: TObject);
 var
-  i: Integer;
+  i,j: Integer;
 begin
   SetWindowLong(Application.Handle, GWL_EXSTYLE, WS_EX_TOOLWINDOW); {不在任务栏显示}
   Fstockname_strs := TStringList.Create;
 
   //设置列表行情显示
   Strgrid_stock.ColCount := 7;
+  Strgrid_stock.RowCount := 7;
   Strgrid_stock.Cells[1, 0] := '代码';
   Strgrid_stock.Cells[2, 0] := '名称';
   Strgrid_stock.Cells[3, 0] := '当前价';
@@ -388,7 +391,7 @@ end;
 
 procedure TFrm_stockhq.GetChart(sUrl: string; flag: Integer);
 begin
-  if StrToInt(sUrl) < 60000 then
+  if StrToInt(sUrl) < 600000 then
     //sUrl := 'http://image.sinajs.cn/newchart/min/n/sz' + sUrl + '.gif'
     sUrl := 'sz' + sUrl
   else
@@ -562,22 +565,62 @@ var
   r: TRect;
 begin
   Str := Strgrid_stock.Cells[ACol, ARow];
+  r := Bounds(Rect.Left - 1, Rect.Top - 1, Rect.Width + 2, Rect.Height + 2);
+
+  with Strgrid_stock.Canvas do
+  begin
+    if gdSelected in State then Brush.Color := RGB(203,226,253) else Brush.Color := clWhite;
+    FillRect(Rect);
+    Pen.Width := 0;
+    Pen.Color := clWhite;
+    Rectangle(r);
+
+    Font.Size := 10;
+    Font.Name := '微软雅黑';
+    if (ARow > 0) and (Acol <> 5) and (Acol <> 1) then
+    begin
+      if (Strgrid_stock.Cells[4, ARow] <> '') and (CompareStr(Strgrid_stock.Cells[3, ARow], Strgrid_stock.Cells[6, ARow]) > 0) then
+        Font.Color := clred //涨|字体颜色为红的
+      else
+        Font.Color := clGreen; //跌|字体颜色为绿的
+    end
+    else
+      Canvas.Font.Color := clBlack;
+
+    TextRect(Rect, Str, [tfCenter, tfVerticalCenter, tfSingleLine]);
+  end;
+ {
   with Strgrid_stock do
   begin
     Canvas.Font.Size := 10;
     Canvas.Font.Name := '微软雅黑';
     if (ARow > 0) and (Acol <> 5) and (Acol <> 1) then
     begin
-      if (Strgrid_stock.Cells[4, ARow] <> '') and (CompareStr(Strgrid_stock.Cells[3, ARow], Strgrid_stock.Cells[6, ARow]) > 0) then
-        Strgrid_stock.Canvas.Font.Color := clred //涨|字体颜色为红的
+      if (Cells[4, ARow] <> '') and (CompareStr(Cells[3, ARow], Strgrid_stock.Cells[6, ARow]) > 0) then
+        Canvas.Font.Color := clred //涨|字体颜色为红的
       else
-        Strgrid_stock.Canvas.Font.Color := clGreen; //跌|字体颜色为绿的
+        Canvas.Font.Color := clGreen; //跌|字体颜色为绿的
     end
     else
-      Strgrid_stock.Canvas.Font.Color := clBlack;
-    Canvas.FillRect(Rect);
-    DrawText(Canvas.Handle, PChar(Str), Length(Str), Rect, DT_CENTER or DT_SINGLELINE or DT_VCENTER); //文字居中
+      Canvas.Font.Color := clBlack;
+   Canvas.FillRect(Rect);  //绘底色
+   canvas.textout(rect.Left,rect.Top,cells[Acol,ARow]); //output text
+    //DrawText(Canvas.Handle, PChar(Str), Length(Str), Rect, DT_CENTER or DT_SINGLELINE or DT_VCENTER); //文字居中
   end;
+ }
+end;
+
+procedure TFrm_stockhq.Strgrid_stockSelectCell(Sender: TObject; ACol, ARow:
+    Integer; var CanSelect: Boolean);
+var
+  r: TRect;
+begin
+//  r := Strgrid_stock.CellRect(ACol, ARow);
+//  with Strgrid_stock.Canvas do
+//  begin
+//    Brush.Color := clBlack;
+//    FillRect(r);
+//  end;
 end;
 
 procedure TFrm_stockhq.StringGrid_wudangDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
