@@ -100,6 +100,7 @@ object Frm_stockhq: TFrm_stockhq
     Height = 554
     Align = alClient
     TabOrder = 5
+    Properties.ActivePage = cxTab_stock
     Properties.CustomButtons.Buttons = <>
     ClientRectBottom = 550
     ClientRectLeft = 4
@@ -109,8 +110,6 @@ object Frm_stockhq: TFrm_stockhq
       Caption = #33258#36873#32929
       ImageIndex = 0
       TabVisible = False
-      ExplicitTop = 24
-      ExplicitHeight = 526
       object Panel5: TPanel
         Left = 0
         Top = 0
@@ -118,7 +117,6 @@ object Frm_stockhq: TFrm_stockhq
         Height = 546
         Align = alClient
         TabOrder = 0
-        ExplicitHeight = 526
         object Strgrid_stock: TStringGrid
           Left = 1
           Top = 1
@@ -141,7 +139,6 @@ object Frm_stockhq: TFrm_stockhq
           TabOrder = 0
           OnClick = Strgrid_stockClick
           OnDrawCell = Strgrid_stockDrawCell
-          ExplicitHeight = 295
         end
         object Panel6: TPanel
           Left = 545
@@ -150,7 +147,6 @@ object Frm_stockhq: TFrm_stockhq
           Height = 315
           Align = alRight
           TabOrder = 1
-          ExplicitHeight = 295
           object lbl_stock: TLabel
             AlignWithMargins = True
             Left = 4
@@ -208,7 +204,6 @@ object Frm_stockhq: TFrm_stockhq
           Align = alBottom
           TabOrder = 2
           Visible = False
-          ExplicitTop = 296
           object Panel8: TPanel
             Left = 1
             Top = 1
@@ -285,8 +280,10 @@ object Frm_stockhq: TFrm_stockhq
       Caption = #36873#32929#31574#30053
       ImageIndex = 1
       TabVisible = False
-      ExplicitTop = 24
-      ExplicitHeight = 526
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object nbMain: TdxNavBar
         Left = 0
         Top = 0
@@ -297,7 +294,6 @@ object Frm_stockhq: TFrm_stockhq
         ActiveGroupIndex = -1
         TabOrder = 0
         View = 16
-        ExplicitHeight = 526
       end
       object Panel1: TPanel
         Left = 158
@@ -312,7 +308,6 @@ object Frm_stockhq: TFrm_stockhq
         Font.Style = []
         ParentFont = False
         TabOrder = 1
-        ExplicitHeight = 526
         object ListView1: TListView
           Left = 1
           Top = 1
@@ -328,7 +323,6 @@ object Frm_stockhq: TFrm_stockhq
           RowSelect = True
           TabOrder = 0
           OnCustomDrawItem = ListView1CustomDrawItem
-          ExplicitHeight = 459
         end
         object Panel2: TPanel
           Left = 1
@@ -339,12 +333,11 @@ object Frm_stockhq: TFrm_stockhq
           BevelOuter = bvNone
           BorderStyle = bsSingle
           TabOrder = 1
-          ExplicitTop = 460
           object StaticText1: TStaticText
             Left = 81
             Top = 0
-            Width = 525
-            Height = 61
+            Width = 4
+            Height = 4
             Align = alClient
             Color = clWhite
             Font.Charset = ANSI_CHARSET
@@ -370,7 +363,7 @@ object Frm_stockhq: TFrm_stockhq
             object Label1: TLabel
               Left = 0
               Top = 0
-              Width = 81
+              Width = 65
               Height = 19
               ParentCustomHint = False
               Align = alTop
@@ -388,13 +381,12 @@ object Frm_stockhq: TFrm_stockhq
               ParentFont = False
               ParentShowHint = False
               ShowHint = False
-              ExplicitWidth = 65
             end
             object Label2: TLabel
               Left = 0
               Top = 19
-              Width = 81
-              Height = 42
+              Width = 7
+              Height = 31
               ParentCustomHint = False
               Align = alClient
               Alignment = taCenter
@@ -410,8 +402,6 @@ object Frm_stockhq: TFrm_stockhq
               ParentFont = False
               ParentShowHint = False
               ShowHint = False
-              ExplicitWidth = 7
-              ExplicitHeight = 31
             end
           end
         end
@@ -421,8 +411,6 @@ object Frm_stockhq: TFrm_stockhq
       Caption = #31995#32479#35774#32622
       ImageIndex = 2
       TabVisible = False
-      ExplicitTop = 24
-      ExplicitHeight = 526
       object Panel4: TPanel
         Left = 3
         Top = 3
@@ -509,7 +497,7 @@ object Frm_stockhq: TFrm_stockhq
           ParentShowHint = False
           ShowHint = False
           TabOrder = 2
-          Text = '3'
+          Text = '1'
         end
         object Check_Kflag: TCheckBox
           Left = 223
@@ -568,8 +556,8 @@ object Frm_stockhq: TFrm_stockhq
     MaxLineAction = maException
     Port = 0
     DefaultPort = 0
-    SSLOptions.Method = sslvSSLv3
-    SSLOptions.SSLVersions = [sslvSSLv3]
+    SSLOptions.Method = sslvSSLv23
+    SSLOptions.SSLVersions = [sslvSSLv2, sslvSSLv3, sslvTLSv1]
     SSLOptions.Mode = sslmUnassigned
     SSLOptions.VerifyMode = []
     SSLOptions.VerifyDepth = 0
@@ -580,8 +568,8 @@ object Frm_stockhq: TFrm_stockhq
     Enabled = False
     Interval = 100
     OnTimer = Timer1Timer
-    Left = 89
-    Top = 168
+    Left = 97
+    Top = 173
   end
   object dxBarManager: TdxBarManager
     Font.Charset = DEFAULT_CHARSET
@@ -1356,5 +1344,11 @@ object Frm_stockhq: TFrm_stockhq
       Category = 0
       Visible = ivAlways
     end
+  end
+  object Timer_k: TTimer
+    Interval = 30000
+    OnTimer = Timer_kTimer
+    Left = 161
+    Top = 143
   end
 end

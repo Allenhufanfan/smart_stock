@@ -80,6 +80,7 @@ type
     btn_close: TButton;
     Panel9: TPanel;
     Check_Kflag: TCheckBox;
+    Timer_k: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure bbStartClick(Sender: TObject);
     procedure bbStopClick(Sender: TObject);
@@ -99,6 +100,7 @@ type
     procedure dxBarBtn_stockClick(Sender: TObject);
     procedure dxBarBtn_smartClick(Sender: TObject);
     procedure dxBarBtn_setClick(Sender: TObject);
+    procedure Timer_kTimer(Sender: TObject);
     procedure WebBrowserEnter(Sender: TObject);
   private
     { Private declarations }
@@ -172,10 +174,10 @@ begin
   ListView1.Clear;
 
   ListView1.Columns.Clear;
-  for i := 0 to 6 do
+  for i := 0 to 9 do
   begin
     ListView1.Columns.Add;
-    ListView1.Columns.Items[i].Width := 100;
+    ListView1.Columns.Items[i].Width := 80;
     ListView1.Columns.Items[i].Alignment := taCenter;
   end;
   ListView1.Columns.Items[1].Caption := '代码';
@@ -183,8 +185,17 @@ begin
   ListView1.Columns.Items[3].Caption := '当前价';
   ListView1.Columns.Items[4].Caption := '涨跌幅';
   ListView1.Columns.Items[5].Caption := '涨跌幅1';
-  ListView1.Columns.Items[6].Caption := '入选时间';
-  ListView1.Columns.Items[6].Width := 150;
+
+  ListView1.Columns.Items[6].Caption := '累计涨跌幅';
+  //ListView1.Columns.Items[6].Width := 150;
+  ListView1.Columns.Items[7].Caption := '入选价格';
+  //ListView1.Columns.Items[6].Width := 150;
+  ListView1.Columns.Items[8].Caption := '入选时间';
+  ListView1.Columns.Items[8].Width := 100;
+
+  ListView1.Columns.Items[9].Caption := '所属主题';
+  //ListView1.Columns.Items[6].Width := 150;
+
   ListView1.Columns.Items[0].Width := 0;
   ListView1.Columns.Items[5].Width := 0;
   Listview1.ViewStyle := vsreport;
@@ -357,7 +368,11 @@ begin
 end;
 
 procedure TFrm_stockhq.GetChart(sUrl: string; flag: Integer);
+var
+  s_market: string;
 begin
+{
+  //新浪K线图行情
   if StrToInt(sUrl) < 600000 then
     //sUrl := 'http://image.sinajs.cn/newchart/min/n/sz' + sUrl + '.gif'
     sUrl := 'sz' + sUrl
@@ -370,6 +385,21 @@ begin
     sUrl := 'http://image.sinajs.cn/newchart/daily/' + sUrl + '.gif'
   else  //周K
     sUrl := 'http://image.sinajs.cn/newchart/weekly/n/' + sUrl + '.gif';
+}
+  //东方财富网K线图行情
+  if StrToInt(sUrl) < 600000 then
+  begin
+    s_market := '2';
+  end
+  else
+    s_market := '1';
+
+  if flag = 1 then    //分时图
+    sUrl := 'http://pifm.eastmoney.com/EM_Finance2014PictureInterface/Index.aspx?id=' + sUrl + s_market +'&imageType=r&token=44c9d251add88e27b65ed86506f6e5da'
+  else if flag = 2 then   //日K
+    sUrl := 'http://pifm.eastmoney.com/EM_Finance2014PictureInterface/Index.aspx?ID='+ sUrl + s_market +'&UnitWidth=-6&imageType=KXL&EF=&Formula=RSI&AT=&&type=&token=44c9d251add88e27b65ed86506f6e5da'
+  else //周K
+    sUrl := 'http://pifm.eastmoney.com/EM_Finance2014PictureInterface/Index.aspx?ID='+ sUrl + s_market +'&UnitWidth=-6&imageType=KXL&EF=&Formula=RSI&AT=&&type=W&token=44c9d251add88e27b65ed86506f6e5da';
 
   WebBrowser.Navigate(sUrl);
 end;
@@ -544,14 +574,16 @@ begin
 
     Font.Size := 10;
     Font.Name := '微软雅黑';
-    //Font.Style := [fsBold];
+    //Font.Style := [fsBold];  //加粗
     //if (ARow > 0) and (Acol <> 5) and (Acol <> 1) then
     if (ARow > 0)then
     begin
-      if (Strgrid_stock.Cells[4, ARow] <> '') and (CompareStr(Strgrid_stock.Cells[3, ARow], Strgrid_stock.Cells[6, ARow]) > 0) then
+      if(CompareStr(Strgrid_stock.Cells[3, ARow], Strgrid_stock.Cells[6, ARow]) > 0) then
         Font.Color := clred //涨|字体颜色为红的
-      else
-        Font.Color := clGreen; //跌|字体颜色为绿的
+      else if (CompareStr(Strgrid_stock.Cells[3, ARow], Strgrid_stock.Cells[6, ARow]) < 0) then
+        Font.Color := clGreen //跌|字体颜色为绿的
+      //else
+      //  Font.Color := clGreen;
     end
     else
       Font.Color := clBlack;
@@ -592,6 +624,24 @@ begin
   end;
 end;
 
+procedure TFrm_stockhq.Timer_kTimer(Sender: TObject);
+begin
+{
+   Timer_k.Enabled := False;
+   GetChart();
+   Timer_k.Enabled := True;
+
+}
+  if (Check_Kflag.Checked) and (Panel7.Visible)then
+  begin
+    WebBrowser.Refresh;
+  end;
+
+  //定时刷新选股策略
+  nbMain.Items.Clear;
+  GetStockType;
+end;
+
 procedure TFrm_stockhq.TrayIcon1DblClick(Sender: TObject);
 begin
   TrayIcon1.Visible := True;
@@ -626,6 +676,7 @@ end;
 procedure TFrm_stockhq.Updlistview(Ajson: TQJson);
 var
   Stockid, StockName, ChangeRate, CurrPx, chosenTime: string;
+  chosenChangeRate, chosenPx, categoryName : string;
   i, nIndex: Integer;
 begin
   //openPx : 今开
@@ -641,16 +692,42 @@ begin
   //currPx：当前价
   //highPx：最高价
   //chosenTime：入选时间
+  //chosenChangeRate: 累计涨跌幅
+  //chosenPx:  入选价格
+  //categoryName: 所属主题
   Stockid := Ajson.ValueByName('code', '');
   StockName := Ajson.ValueByName('name', '');
   CurrPx := Format('%.2f', [Ajson.ItemByName('currPx').AsFloat]);
   ChangeRate := Format('%.2f%s', [(Ajson.ItemByName('changeRate').AsFloat) * 100, '%']);
   chosenTime := Ajson.ValueByName('chosenTime', '');
+  //chosenChangeRate := Format('%.2f%s', [(Ajson.ItemByName('chosenChangeRate').AsFloat) * 100, '%']);
+  chosenChangeRate := Ajson.ValueByName('chosenChangeRate', '0');
+  chosenPx := Ajson.ValueByName('chosenPx','0');
+  categoryName := Ajson.ValueByName('categoryName','');
+
+  if chosenChangeRate = '0' then
+    ListView1.Columns.Items[6].Width := 0
+  else
+  begin
+    chosenChangeRate := Format('%.2f%s', [StrToFloat(chosenChangeRate) * 100, '%']);
+    ListView1.Columns.Items[6].Width := 80;
+  end;
+
+  if chosenPx = '0' then
+    ListView1.Columns.Items[7].Width := 0
+  else
+    ListView1.Columns.Items[7].Width := 80;
+
+  if categoryName = '' then
+    ListView1.Columns.Items[9].Width := 0
+  else
+    ListView1.Columns.Items[9].Width := 80;
+
   if not (bFirst_Select) then
   begin
     //更新数据
     //锁住listview防止刷新
-    LockWindowUpdate(Self.ListView1.Handle);
+    //LockWindowUpdate(Self.ListView1.Handle);
     ListView1.Items.BeginUpdate;
     try
       with ListView1 do
@@ -661,14 +738,17 @@ begin
           begin
             Items.Item[i].SubItems.Strings[2] := CurrPx;
             Items.Item[i].SubItems.Strings[3] := ChangeRate;
-            Items.Item[i].SubItems.Strings[5] := chosenTime;
+            Items.Item[i].SubItems.Strings[5] := chosenChangeRate;
+            Items.Item[i].SubItems.Strings[6] := chosenPx;
+            Items.Item[i].SubItems.Strings[7] := chosenTime;
+            Items.Item[i].SubItems.Strings[8] := categoryName;
           end;
         end;
       end;
     finally
       ListView1.Items.EndUpdate;
       //解锁listview
-      LockWindowUpdate(0);
+      //LockWindowUpdate(0);
     end;
   end
   else
@@ -680,8 +760,11 @@ begin
       subitems.add(StockName);
       subitems.add(CurrPx);
       subitems.add(ChangeRate);
-      subItems.Add(Ajson.ItemByName('changeRate').AsString);
+      subItems.add(Ajson.ItemByName('changeRate').AsString);
+      subitems.add(chosenChangeRate);
+      subitems.add(chosenPx);
       subitems.add(chosenTime);
+      subitems.add(categoryName);
     end;
   end;
 end;
@@ -777,15 +860,15 @@ var
 begin
   Current_Price := Format('%.2f', [StrToFloat(Fstocprice_strs[3])]);  //当前价格
   Yest_Price := Format('%.2f', [StrToFloat(Fstocprice_strs[2])]);  //昨日价格
-  Frm_stockhq.Strgrid_stock.Cells[2, ncolumn + 1] := Fstocprice_strs[0];  //股票名称
-  Frm_stockhq.Strgrid_stock.Cells[3, ncolumn + 1] := Current_Price;  //当前价格
-  Frm_stockhq.Strgrid_stock.Cells[6, ncolumn + 1] := Yest_Price;  //昨日价格
+  Frm_stockhq.Strgrid_stock.Cells[2, nColumn + 1] := Fstocprice_strs[0];  //股票名称
+  Frm_stockhq.Strgrid_stock.Cells[3, nColumn + 1] := Current_Price;  //当前价格
+  Frm_stockhq.Strgrid_stock.Cells[6, nColumn + 1] := Yest_Price;  //昨日价格
   Change_amt := StrToFloat(Fstocprice_strs[3]) - StrToFloat(Fstocprice_strs[2]);
   if (Change_amt > 0) then
     Change_flag := '+';
   Change_percent := Format('%s%.2f%s%.2f%s', [Change_flag, Change_amt, '(', Change_amt * 100 / StrToFloat(Fstocprice_strs[2]), '%)']);
-  Frm_stockhq.Strgrid_stock.Cells[4, ncolumn + 1] := Change_percent;  //涨跌幅
-  Frm_stockhq.Strgrid_stock.Cells[5, ncolumn + 1] := FormatDateTime('hh时nn分ss秒', now());
+  Frm_stockhq.Strgrid_stock.Cells[4, nColumn + 1] := Change_percent;  //涨跌幅
+  Frm_stockhq.Strgrid_stock.Cells[5, nColumn + 1] := FormatDateTime('hh时nn分ss秒', now());
 
   //更新五档行情
   if Frm_stockhq.FSelect_stock = Fthread_stock then
