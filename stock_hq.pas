@@ -7,16 +7,15 @@ uses
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, IdIOHandler,
   IdIOHandlerSocket, IdIOHandlerStack, IdSSL, IdSSLOpenSSL, IdBaseComponent,
   IdComponent, IdTCPConnection, IdTCPClient, Vcl.StdCtrls, IdHTTP, DateUtils,
-  qstring, qjson, Vcl.ComCtrls, Vcl.ExtCtrls, cxGraphics, cxControls, dxNavBar,
-  dxNavBarBase, dxNavBarCollns, cxLookAndFeels, cxLookAndFeelPainters,
+  qjson, Vcl.ComCtrls, Vcl.ExtCtrls, cxGraphics, cxControls, dxNavBar,
+  dxNavBarCollns, cxLookAndFeels, cxLookAndFeelPainters,
   dxStatusBar, dxBarBuiltInMenu, cxPC, Vcl.Menus, Vcl.Grids, StrUtils, dxBar,
-  cxClasses, Vcl.OleCtrls, SHDocVw;
+  cxClasses, Vcl.OleCtrls, SHDocVw, SQLiteTable3, Vcl.ActnList;
 
 type
   // 建立一个获取行情数据的线程
   TRevThread = class(TThread)
   private
-    Fstockname_strs: TStrings;
     Fstocprice_strs: TStrings;
     nColumn: Integer;
     FidHttp_stock: TIdHTTP;
@@ -25,7 +24,7 @@ type
   protected
     procedure Execute; override;
   public
-    constructor Create(stockname_strs: TStrings; time: Integer);
+    constructor Create(time: Integer);
     procedure SplitString(sHTML_Text: string);
     procedure UpdateGrid;
   end;
@@ -41,7 +40,7 @@ type
     lbl_stock: TLabel;
     nbMain: TdxNavBar;
     Panel1: TPanel;
-    ListView1: TListView;
+    lv_Smart: TListView;
     Panel2: TPanel;
     StaticText1: TStaticText;
     Panel3: TPanel;
@@ -81,6 +80,21 @@ type
     Panel9: TPanel;
     Check_Kflag: TCheckBox;
     Timer_k: TTimer;
+    PP_stk: TPopupMenu;
+    itInsert: TMenuItem;
+    itUpd: TMenuItem;
+    itDelete: TMenuItem;
+    ActionList: TActionList;
+    Act_Add: TAction;
+    Act_Upd: TAction;
+    Act_Del: TAction;
+    PP_Smart: TPopupMenu;
+    MenuItem1: TMenuItem;
+    Act_Smart: TAction;
+    procedure Act_AddExecute(Sender: TObject);
+    procedure Act_DelExecute(Sender: TObject);
+    procedure Act_SmartExecute(Sender: TObject);
+    procedure Act_UpdExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure bbStartClick(Sender: TObject);
     procedure bbStopClick(Sender: TObject);
@@ -91,7 +105,7 @@ type
     procedure dxBarBtn_refreshClick(Sender: TObject);
     procedure Exit1Click(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-    procedure ListView1CustomDrawItem(Sender: TCustomListView; Item: TListItem; State: TCustomDrawState; var DefaultDraw: Boolean);
+    procedure lv_SmartCustomDrawItem(Sender: TCustomListView; Item: TListItem; State: TCustomDrawState; var DefaultDraw: Boolean);
     procedure Strgrid_stockClick(Sender: TObject);
     procedure Strgrid_stockDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
     procedure StringGrid_wudangDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
@@ -100,6 +114,7 @@ type
     procedure dxBarBtn_stockClick(Sender: TObject);
     procedure dxBarBtn_smartClick(Sender: TObject);
     procedure dxBarBtn_setClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
     procedure Timer_kTimer(Sender: TObject);
     procedure WebBrowserEnter(Sender: TObject);
   private
@@ -128,10 +143,103 @@ type
 
 var
   Frm_stockhq: TFrm_stockhq;
+  SqlDb : TSQLiteDatabase;
 
 implementation
 
 {$R *.dfm}
+uses setStkSql, USetStk;
+
+procedure TFrm_stockhq.Act_AddExecute(Sender: TObject);
+var
+  bSqlResult: Boolean;
+  sStkName: string;  //证券名称
+  sStkCode: string;  //证券名称
+  sChosenPx: string; //入选价格
+begin
+  frmSetStk := TFrmSetStk.Create(self);
+  try
+    frmSetStk.edt__stk.Text := '';
+    frmSetStk.edt_stkname.Text := '';
+    frmSetStk.edt_px.Text := '';
+    if frmSetStk.ShowModal = mrCancel then
+      Exit;
+  finally
+    frmSetStk.Free;
+  end;
+  dxBarBtn_refreshClick(nil);
+end;
+
+procedure TFrm_stockhq.Act_DelExecute(Sender: TObject);
+var
+  Rowindex: integer;
+  bSqlResult : Boolean;
+  sStkName : string;  //证券名称
+  sStkCode : string;  //证券名称
+  sChosenPx: string; //入选价格
+begin
+  Rowindex := Strgrid_stock.Row; //获取行索引
+  if Rowindex > 0 then
+  begin
+    sStkCode := Strgrid_stock.Cells[1, Rowindex];
+    DelStock_sql(sStkCode);
+  end;
+  dxBarBtn_refreshClick(nil);
+end;
+
+procedure TFrm_stockhq.Act_SmartExecute(Sender: TObject);
+var
+  sStkName: string;  //证券名称
+  sStkCode: string;  //证券名称
+  sChosenPx: string; //入选价格
+  bSqlResult: Boolean;
+begin
+  if lv_Smart.Selected = nil then
+  begin
+    MessageBox(Handle, '请选择要添加的证券！', '提示', MB_OK + MB_ICONINFORMATION);
+    Exit;
+  end;
+  sStkCode := lv_Smart.Selected.SubItems.Strings[0];
+  sStkName := lv_Smart.Selected.SubItems.Strings[1];
+  sChosenPx := lv_Smart.Selected.SubItems.Strings[2];
+  bSqlResult := SetStock_sql(sStkCode, sStkName, sChosenPx);
+  if bSqlResult then
+  begin
+    MessageBox(Handle, '添加证券成功！', '提示', MB_OK + MB_ICONINFORMATION);
+      //刷新
+    dxBarBtn_refreshClick(nil);
+  end
+  else
+    MessageBox(Handle, '添加证券失败！', '错误', MB_OK + MB_ICONSTOP)
+end;
+
+procedure TFrm_stockhq.Act_UpdExecute(Sender: TObject);
+var
+  Rowindex: integer;
+  bSqlResult : Boolean;
+  sStkName : string;  //证券名称
+  sStkCode : string;  //证券名称
+  sChosenPx: string; //入选价格
+begin
+  Rowindex := Strgrid_stock.Row; //获取行索引
+  if Rowindex > 0 then
+  begin
+    sStkCode := Strgrid_stock.Cells[1, Rowindex];
+    sStkName := Strgrid_stock.Cells[2, Rowindex];
+    sChosenPx := Strgrid_stock.Cells[6, Rowindex];
+
+    frmSetStk := TFrmSetStk.Create(self);
+    try
+      frmSetStk.edt__stk.Text := sStkCode;
+      frmSetStk.edt_stkname.Text := sStkName;
+      frmSetStk.edt_px.Text := sChosenPx;
+      if frmSetStk.ShowModal = mrCancel then
+        Exit;
+    finally
+      frmSetStk.Free;
+    end;
+  end;
+end;
 
 procedure TFrm_stockhq.FormCreate(Sender: TObject);
 var
@@ -139,21 +247,24 @@ var
 begin
   SetWindowLong(Application.Handle, GWL_EXSTYLE, WS_EX_TOOLWINDOW); {不在任务栏显示}
   Fstockname_strs := TStringList.Create;
-
+  SqlDb := TSQLiteDatabase.Create('stock.db');
   //设置列表行情显示
-  Strgrid_stock.ColCount := 7;
-  Strgrid_stock.RowCount := 7;
+  Strgrid_stock.ColCount := 9;
+  Strgrid_stock.RowCount := 9;
   Strgrid_stock.Cells[1, 0] := '代码';
   Strgrid_stock.Cells[2, 0] := '名称';
   Strgrid_stock.Cells[3, 0] := '当前价';
   Strgrid_stock.Cells[4, 0] := '涨跌幅';
-  Strgrid_stock.Cells[5, 0] := '更新时间';
-  Strgrid_stock.Cells[6, 0] := '昨日收盘价';
-  Strgrid_stock.ColWidths[1] := 60;
-  Strgrid_stock.ColWidths[4] := 120;
-  Strgrid_stock.ColWidths[5] := 100;
+  Strgrid_stock.Cells[5, 0] := '累计涨跌幅';
+  Strgrid_stock.Cells[6, 0] := '入选价格';
+  Strgrid_stock.Cells[7, 0] := '入选时间';
+  Strgrid_stock.Cells[8, 0] := '昨日收盘价';
+  //Strgrid_stock.ColWidths[1] := 60;
   Strgrid_stock.ColWidths[0] := 0;
-  Strgrid_stock.ColWidths[6] := -1;
+  Strgrid_stock.ColWidths[4] := 100;
+  Strgrid_stock.ColWidths[5] := 75;
+  Strgrid_stock.ColWidths[7] := 140;
+  Strgrid_stock.ColWidths[8] := -1;
 
   //五档行情
   StringGrid_wudang.RowHeights[0] := 0;
@@ -171,35 +282,35 @@ begin
 
   bt_status(False);
   cxPageControl.ActivePage := cxTab_stock;
-  ListView1.Clear;
+  lv_Smart.Clear;
 
-  ListView1.Columns.Clear;
+  lv_Smart.Columns.Clear;
   for i := 0 to 9 do
   begin
-    ListView1.Columns.Add;
-    ListView1.Columns.Items[i].Width := 80;
-    ListView1.Columns.Items[i].Alignment := taCenter;
+    lv_Smart.Columns.Add;
+    lv_Smart.Columns.Items[i].Width := 75;
+    lv_Smart.Columns.Items[i].Alignment := taCenter;
   end;
-  ListView1.Columns.Items[1].Caption := '代码';
-  ListView1.Columns.Items[2].Caption := '名称';
-  ListView1.Columns.Items[3].Caption := '当前价';
-  ListView1.Columns.Items[4].Caption := '涨跌幅';
-  ListView1.Columns.Items[5].Caption := '涨跌幅1';
+  lv_Smart.Columns.Items[1].Caption := '代码';
+  lv_Smart.Columns.Items[2].Caption := '名称';
+  lv_Smart.Columns.Items[3].Caption := '当前价';
+  lv_Smart.Columns.Items[4].Caption := '涨跌幅';
+  lv_Smart.Columns.Items[5].Caption := '涨跌幅1';
 
-  ListView1.Columns.Items[6].Caption := '累计涨跌幅';
+  lv_Smart.Columns.Items[6].Caption := '累计涨跌幅';
+  lv_Smart.Columns.Items[6].Width := 80;
+  lv_Smart.Columns.Items[7].Caption := '入选价格';
   //ListView1.Columns.Items[6].Width := 150;
-  ListView1.Columns.Items[7].Caption := '入选价格';
-  //ListView1.Columns.Items[6].Width := 150;
-  ListView1.Columns.Items[8].Caption := '入选时间';
-  ListView1.Columns.Items[8].Width := 100;
+  lv_Smart.Columns.Items[8].Caption := '入选时间';
+  lv_Smart.Columns.Items[8].Width := 140;
 
-  ListView1.Columns.Items[9].Caption := '所属主题';
+  lv_Smart.Columns.Items[9].Caption := '所属主题';
   //ListView1.Columns.Items[6].Width := 150;
 
-  ListView1.Columns.Items[0].Width := 0;
-  ListView1.Columns.Items[5].Width := 0;
-  Listview1.ViewStyle := vsreport;
-  Listview1.GridLines := False;
+  lv_Smart.Columns.Items[0].Width := 0;
+  lv_Smart.Columns.Items[5].Width := 0;
+  lv_Smart.ViewStyle := vsreport;
+  lv_Smart.GridLines := False;
 
   lbl_stock.Font.Color := RGB(0,85,162);
   GetStockType;
@@ -212,7 +323,9 @@ var
   s: string;
   path: string;
   Sstock_name: TStrings;
+  SqlTb: TSQLiteTable;
 begin
+  {
   //获取股票代码
   path := ExtractFilePath(Application.ExeName);
   try
@@ -224,8 +337,17 @@ begin
     ShowMessage('获取股票代码失败');
     Exit;
   end;
-
-  Fstockname_strs.CommaText := s;
+  }
+  //通过sqlite数据库获取自选股数据
+  Fstockname_strs.Clear;
+  SqlTb := SqlDb.GetTable('select * from stock');
+  SqlTb.MoveFirst;
+  while not SqlTb.EOF do
+  begin
+    Fstockname_strs.Add(SqlTb.FieldAsString(SqlTb.FieldIndex['stkcode']));
+    SqlTb.Next;
+  end;
+  //Fstockname_strs.CommaText := s;
 
   for i := 0 to Fstockname_strs.Count - 1 do
   begin
@@ -239,16 +361,20 @@ begin
   Strgrid_stock.RowCount := Fstockname_strs.Count + 1;
 
   Fstockname_strs.Add('sh000001'); //上证指数
-  Fstockname_strs.Add('sz399001'); //深圳指数
+  Fstockname_strs.Add('sz399001'); //深证指数
   Fstockname_strs.Add('sz399006'); //创业板指数
-  FStock_thread := TRevThread.Create(Fstockname_strs, StrToInt(edt_fresh.Text));
+  FStock_thread := TRevThread.Create(StrToInt(edt_fresh.Text));
   FStock_thread.FreeOnTerminate := True;
   FStock_thread.Resume;
 
+  //获取选股策略
+  GetStockType;
   bt_status(True);
 end;
 
 procedure TFrm_stockhq.bbStopClick(Sender: TObject);
+var
+  i: Integer;
 begin
   if (FStock_thread <> nil) then
   begin
@@ -257,6 +383,11 @@ begin
     FStock_thread.Terminate;
     FStock_thread := nil;
   end;
+  for i := 1 to Strgrid_stock.RowCount - 1 do //不清除表头
+    Strgrid_stock.Rows[i].Clear;
+  Fstockname_strs.Clear;
+  nbMain.Items.Clear;
+  lv_Smart.Clear;
   bt_status(False);
 end;
 
@@ -332,8 +463,6 @@ end;
 
 procedure TFrm_stockhq.dxBarBtn_refreshClick(Sender: TObject);
 begin
-  nbMain.Items.Clear;
-  GetStockType;
   bbStop.OnClick(Sender);
   bbStart.OnClick(Sender);
 end;
@@ -365,6 +494,11 @@ begin
   TrayIcon1.SetDefaultIcon;
   Hide;
   CanClose := False;
+end;
+
+procedure TFrm_stockhq.FormShow(Sender: TObject);
+begin
+  dxBarBtn_refreshClick(nil);
 end;
 
 procedure TFrm_stockhq.GetChart(sUrl: string; flag: Integer);
@@ -525,11 +659,11 @@ begin
   Timer1.Interval := 100;
   Timer1.Enabled := False;
   Timer1.Enabled := True;
-  ListView1.Items.Clear;
+  lv_Smart.Items.Clear;
   bFirst_Select := True;
 end;
 
-procedure TFrm_stockhq.ListView1CustomDrawItem(Sender: TCustomListView; Item: TListItem; State: TCustomDrawState; var DefaultDraw: Boolean);
+procedure TFrm_stockhq.lv_SmartCustomDrawItem(Sender: TCustomListView; Item: TListItem; State: TCustomDrawState; var DefaultDraw: Boolean);
 begin
   item.listview.Canvas.Font.Size := 10;
   item.listview.Canvas.Font.Name := '微软雅黑';
@@ -548,7 +682,7 @@ begin
   if Rowindex > 0 then
   begin
     FSelect_stock := Strgrid_stock.Cells[1, Rowindex];
-    if Check_Kflag.Checked then
+    if (Check_Kflag.Checked) and (FSelect_stock <> '') then
     begin
       Panel7.Visible := True;
       GetChart(FSelect_stock, 1);
@@ -578,9 +712,9 @@ begin
     //if (ARow > 0) and (Acol <> 5) and (Acol <> 1) then
     if (ARow > 0)then
     begin
-      if(CompareStr(Strgrid_stock.Cells[3, ARow], Strgrid_stock.Cells[6, ARow]) > 0) then
+      if(CompareStr(Strgrid_stock.Cells[3, ARow], Strgrid_stock.Cells[8, ARow]) > 0) then
         Font.Color := clred //涨|字体颜色为红的
-      else if (CompareStr(Strgrid_stock.Cells[3, ARow], Strgrid_stock.Cells[6, ARow]) < 0) then
+      else if (CompareStr(Strgrid_stock.Cells[3, ARow], Strgrid_stock.Cells[8, ARow]) < 0) then
         Font.Color := clGreen //跌|字体颜色为绿的
       //else
       //  Font.Color := clGreen;
@@ -677,7 +811,7 @@ procedure TFrm_stockhq.Updlistview(Ajson: TQJson);
 var
   Stockid, StockName, ChangeRate, CurrPx, chosenTime: string;
   chosenChangeRate, chosenPx, categoryName : string;
-  i, nIndex: Integer;
+  i: Integer;
 begin
   //openPx : 今开
   //changeRate:涨跌幅
@@ -696,6 +830,7 @@ begin
   //chosenPx:  入选价格
   //categoryName: 所属主题
   Stockid := Ajson.ValueByName('code', '');
+  Stockid := LeftStr(Stockid, 6);
   StockName := Ajson.ValueByName('name', '');
   CurrPx := Format('%.2f', [Ajson.ItemByName('currPx').AsFloat]);
   ChangeRate := Format('%.2f%s', [(Ajson.ItemByName('changeRate').AsFloat) * 100, '%']);
@@ -706,31 +841,38 @@ begin
   categoryName := Ajson.ValueByName('categoryName','');
 
   if chosenChangeRate = '0' then
-    ListView1.Columns.Items[6].Width := 0
+  begin
+    chosenChangeRate := '——';
+  end
   else
   begin
     chosenChangeRate := Format('%.2f%s', [StrToFloat(chosenChangeRate) * 100, '%']);
-    ListView1.Columns.Items[6].Width := 80;
   end;
 
   if chosenPx = '0' then
-    ListView1.Columns.Items[7].Width := 0
-  else
-    ListView1.Columns.Items[7].Width := 80;
+    chosenPx := '——';
 
   if categoryName = '' then
-    ListView1.Columns.Items[9].Width := 0
+  begin
+    lv_Smart.Columns.Items[6].Width := 80;
+    lv_Smart.Columns.Items[7].Width := 75;
+    lv_Smart.Columns.Items[9].Width := 0;
+  end
   else
-    ListView1.Columns.Items[9].Width := 80;
+  begin
+    lv_Smart.Columns.Items[6].Width := 0;
+    lv_Smart.Columns.Items[7].Width := 0;
+    lv_Smart.Columns.Items[9].Width := 80;
+  end;
 
   if not (bFirst_Select) then
   begin
     //更新数据
     //锁住listview防止刷新
     //LockWindowUpdate(Self.ListView1.Handle);
-    ListView1.Items.BeginUpdate;
+    lv_Smart.Items.BeginUpdate;
     try
-      with ListView1 do
+      with lv_Smart do
       begin
         for i := 0 to Items.Count - 1 do
         begin
@@ -746,7 +888,7 @@ begin
         end;
       end;
     finally
-      ListView1.Items.EndUpdate;
+      lv_Smart.Items.EndUpdate;
       //解锁listview
       //LockWindowUpdate(0);
     end;
@@ -754,7 +896,7 @@ begin
   else
   begin
     //增加数据
-    with listview1.items.add do
+    with lv_Smart.items.add do
     begin
       subitems.add(Stockid);
       subitems.add(StockName);
@@ -784,14 +926,12 @@ begin
   end;
 end;
 
-constructor TRevThread.Create(stockname_strs: TStrings; time: Integer);
+constructor TRevThread.Create(time: Integer);
 begin
   inherited Create(True);
-  Fstockname_strs := TStringList.Create;
   Fstocprice_strs := TStringList.Create;
   //输出文件中带有空格，自动被分割，导致错误
   Fstocprice_strs.StrictDelimiter := True;
-  Fstockname_strs := stockname_strs;
   Fresh_time := time;
   FidHttp_stock := TIdHTTP.Create(nil);
 end;
@@ -805,10 +945,10 @@ begin
   try
     while not Terminated do
     begin
-      for i := 0 to Fstockname_strs.Count - 1 do
+      for i := 0 to Frm_stockhq.Fstockname_strs.Count - 1 do
       begin
         nColumn := i;
-        url := 'http://hq.sinajs.cn/?list=' + Fstockname_strs[i];
+        url := 'http://hq.sinajs.cn/?list=' + Frm_stockhq.Fstockname_strs[i];
 
          //使用代理服务器
         //IdHTTP1.ProxyParams.ProxyServer := '代理服务器地址';
@@ -852,23 +992,41 @@ procedure TRevThread.UpdateGrid;
   end;
 
 var
+  SqlTb: TSQLiteTable;
   Change_percent: string;
   Current_Price : string;
   Yest_Price : string;
   Change_amt: Double;
   Change_flag: string;
+  ChosenTime: string; //入选时间
+  ChosenChangeRate: string;//累计涨跌幅
+  ChosenPx: string; //入选价格
 begin
   Current_Price := Format('%.2f', [StrToFloat(Fstocprice_strs[3])]);  //当前价格
   Yest_Price := Format('%.2f', [StrToFloat(Fstocprice_strs[2])]);  //昨日价格
   Frm_stockhq.Strgrid_stock.Cells[2, nColumn + 1] := Fstocprice_strs[0];  //股票名称
   Frm_stockhq.Strgrid_stock.Cells[3, nColumn + 1] := Current_Price;  //当前价格
-  Frm_stockhq.Strgrid_stock.Cells[6, nColumn + 1] := Yest_Price;  //昨日价格
+  Frm_stockhq.Strgrid_stock.Cells[8, nColumn + 1] := Yest_Price;  //昨日价格
   Change_amt := StrToFloat(Fstocprice_strs[3]) - StrToFloat(Fstocprice_strs[2]);
   if (Change_amt > 0) then
     Change_flag := '+';
   Change_percent := Format('%s%.2f%s%.2f%s', [Change_flag, Change_amt, '(', Change_amt * 100 / StrToFloat(Fstocprice_strs[2]), '%)']);
   Frm_stockhq.Strgrid_stock.Cells[4, nColumn + 1] := Change_percent;  //涨跌幅
-  Frm_stockhq.Strgrid_stock.Cells[5, nColumn + 1] := FormatDateTime('hh时nn分ss秒', now());
+  //Frm_stockhq.Strgrid_stock.Cells[5, nColumn + 1] := FormatDateTime('hh时nn分ss秒', now());
+
+  //读取db文件更新ChosenTim: string; //入选时间 ChosenChangeRate: string;//累计涨跌幅 ChosenPx: string; //入选价格
+  SqlTb := SqlDb.GetTable('select * from stock where stkcode =' + QuotedStr(Fthread_stock));
+  if SqlTb.Count > 0 then
+  begin
+    ChosenTime := SqlTb.FieldAsString(SqlTb.FieldIndex['chosentime']);
+    ChosenPx := SqlTb.FieldAsString(SqlTb.FieldIndex['chosenpx']);
+    ChosenChangeRate := Format('%.2f%s', [(StrToFloat(Fstocprice_strs[3]) - StrToFloat(ChosenPx)) * 100 / StrToFloat(ChosenPx), '%']);
+    Frm_stockhq.Strgrid_stock.Cells[5, nColumn + 1] := ChosenChangeRate;
+    Frm_stockhq.Strgrid_stock.Cells[6, nColumn + 1] := ChosenPx;
+    Frm_stockhq.Strgrid_stock.Cells[7, nColumn + 1] := ChosenTime;
+  end;
+  //更新刷新时间
+  Frm_stockhq.dxStatusBar.Panels[7].Text := FormatDateTime('hh:nn:ss', now());
 
   //更新五档行情
   if Frm_stockhq.FSelect_stock = Fthread_stock then
