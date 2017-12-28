@@ -27,7 +27,6 @@ object FrmSetStk: TFrmSetStk
     ParentBackground = False
     ParentDoubleBuffered = False
     TabOrder = 0
-    ExplicitHeight = 188
     object Label2: TLabel
       Left = 38
       Top = 64
@@ -70,7 +69,7 @@ object FrmSetStk: TFrmSetStk
     end
     object edt__stk: TLabeledEdit
       Left = 95
-      Top = 19
+      Top = 18
       Width = 121
       Height = 21
       EditLabel.Width = 52
@@ -91,8 +90,8 @@ object FrmSetStk: TFrmSetStk
       EditLabel.Height = 13
       EditLabel.Caption = #25104#26412#20215#26684':'
       LabelPosition = lpLeft
-      NumbersOnly = True
       TabOrder = 2
+      OnKeyPress = edt_pxKeyPress
     end
   end
   object IdGetStk: TIdHTTP

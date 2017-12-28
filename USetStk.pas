@@ -20,6 +20,7 @@ type
     IdGetStk: TIdHTTP;
     procedure btn_CancelClick(Sender: TObject);
     procedure btn_SureClick(Sender: TObject);
+    procedure edt_pxKeyPress(Sender: TObject; var Key: Char);
     procedure edt__stkChange(Sender: TObject);
     procedure edt__stkKeyPress(Sender: TObject; var Key: Char);
   private
@@ -64,6 +65,14 @@ begin
       ModalResult := mrOK;
       MessageBox(Handle, '添加或修改证券成功！', '提示', MB_OK + MB_ICONINFORMATION);
    end;
+end;
+
+procedure TFrmSetStk.edt_pxKeyPress(Sender: TObject; var Key: Char);
+begin
+  if not (key in ['0'..'9', '.', #8]) then
+    key := #0;
+  if (key = '.') and ((Pos('.', edt_px.Text) > 0) or (Length(edt_px.Text) = 0)) then
+    key := #0;
 end;
 
 procedure TFrmSetStk.edt__stkChange(Sender: TObject);
