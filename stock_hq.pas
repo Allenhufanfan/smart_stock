@@ -8,7 +8,7 @@ uses
   IdIOHandlerSocket, IdIOHandlerStack, IdSSL, IdSSLOpenSSL, IdBaseComponent,
   IdComponent, IdTCPConnection, IdTCPClient, Vcl.StdCtrls, IdHTTP, DateUtils,
   qjson, Vcl.ComCtrls, Vcl.ExtCtrls, cxGraphics, cxControls, dxNavBar,
-  dxNavBarCollns, cxLookAndFeels, cxLookAndFeelPainters,
+  dxNavBarCollns, cxLookAndFeels, cxLookAndFeelPainters,Winapi.ShellAPI,
   dxStatusBar, dxBarBuiltInMenu, cxPC, Vcl.Menus, Vcl.Grids, StrUtils, dxBar,
   cxClasses, Vcl.OleCtrls, SHDocVw, SQLiteTable3, Vcl.ActnList;
 
@@ -67,11 +67,7 @@ type
     bbStop: TButton;
     edt_fresh: TEdit;
     Panel7: TPanel;
-    dxBarButton1: TdxBarButton;
-    dxBarButton2: TdxBarButton;
     dxBarSubItem1: TdxBarSubItem;
-    dxBarLargeButton1: TdxBarLargeButton;
-    WebBrowser: TWebBrowser;
     Panel8: TPanel;
     btn_min: TButton;
     btn_day: TButton;
@@ -91,7 +87,12 @@ type
     PP_Smart: TPopupMenu;
     MenuItem1: TMenuItem;
     Act_Smart: TAction;
+    Act_browser: TAction;
+    N1: TMenuItem;
+    N2: TMenuItem;
+    WebBrowser: TWebBrowser;
     procedure Act_AddExecute(Sender: TObject);
+    procedure Act_browserExecute(Sender: TObject);
     procedure Act_DelExecute(Sender: TObject);
     procedure Act_SmartExecute(Sender: TObject);
     procedure Act_UpdExecute(Sender: TObject);
@@ -116,10 +117,10 @@ type
     procedure dxBarBtn_setClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure Timer_kTimer(Sender: TObject);
-    procedure WebBrowserEnter(Sender: TObject);
   private
     { Private declarations }
   public
+    { Public declarations }
     Fstockname_strs: TStrings;
     FStock_thread: TRevThread;
     FSelect_stock: string;        //选中的股票代码
@@ -129,16 +130,15 @@ type
     procedure bt_status(Fstatus: Boolean);
     procedure CreateNav(sType: string; Ajson: TQJson);
     procedure GetChart(sUrl: string; flag: Integer);
-    function GetHTML(Url: string): string;
     procedure GetStock(Url: string);
     procedure GetStockType;
-    function GetUnixTime: string;
+    procedure Updlistview(Ajson: TQJson);
     procedure ItemClick(Sender: TObject);
+    procedure WMSysCommand(var msg: TMessage); message WM_SYSCOMMAND;
+    function GetHTML(Url: string): string;
+    function GetUnixTime: string;
     //Unicode转中文编码
     function UnicodeToChinese(inputstr: string): string; overload;
-    procedure Updlistview(Ajson: TQJson);
-    procedure WMSysCommand(var msg: TMessage); message WM_SYSCOMMAND;
-    { Public declarations }
   end;
 
 var
@@ -151,11 +151,6 @@ implementation
 uses setStkSql, USetStk;
 
 procedure TFrm_stockhq.Act_AddExecute(Sender: TObject);
-var
-  bSqlResult: Boolean;
-  sStkName: string;  //证券名称
-  sStkCode: string;  //证券名称
-  sChosenPx: string; //入选价格
 begin
   frmSetStk := TFrmSetStk.Create(self);
   try
@@ -170,13 +165,41 @@ begin
   dxBarBtn_refreshClick(nil);
 end;
 
+procedure TFrm_stockhq.Act_browserExecute(Sender: TObject);
+var
+  sUrl: string;
+  Rowindex: integer;
+  sStkCode: string;  //证券代码
+begin
+  if cxPageControl.ActivePage = cxTab_stock then
+  begin
+    Rowindex := Strgrid_stock.Row; //获取行索引
+    if Rowindex > 0 then
+    begin
+      sStkCode := Strgrid_stock.Cells[1, Rowindex];
+    end;
+  end
+  else if cxPageControl.ActivePage = cxTab_Smart then
+  begin
+    if lv_Smart.Selected = nil then
+    begin
+      MessageBox(Handle, '请选择要打开的证券！', '提示', MB_OK + MB_ICONINFORMATION);
+      Exit;
+    end;
+    sStkCode := lv_Smart.Selected.SubItems.Strings[0];
+  end;
+  if sStkCode < '600000' then
+    sUrl := 'https://xueqiu.com/S/SZ' + sStkCode
+  else
+    sUrl := 'https://xueqiu.com/S/SH' + sStkCode;
+  //打开浏览器
+  ShellExecute(Handle, nil, PChar(sUrl), nil, nil, SW_SHOWNORMAL);
+end;
+
 procedure TFrm_stockhq.Act_DelExecute(Sender: TObject);
 var
   Rowindex: integer;
-  bSqlResult : Boolean;
-  sStkName : string;  //证券名称
   sStkCode : string;  //证券名称
-  sChosenPx: string; //入选价格
 begin
   Rowindex := Strgrid_stock.Row; //获取行索引
   if Rowindex > 0 then
@@ -190,7 +213,7 @@ end;
 procedure TFrm_stockhq.Act_SmartExecute(Sender: TObject);
 var
   sStkName: string;  //证券名称
-  sStkCode: string;  //证券名称
+  sStkCode: string;  //证券代码
   sChosenPx: string; //入选价格
   bSqlResult: Boolean;
 begin
@@ -216,7 +239,6 @@ end;
 procedure TFrm_stockhq.Act_UpdExecute(Sender: TObject);
 var
   Rowindex: integer;
-  bSqlResult : Boolean;
   sStkName : string;  //证券名称
   sStkCode : string;  //证券名称
   sChosenPx: string; //入选价格
@@ -243,7 +265,7 @@ end;
 
 procedure TFrm_stockhq.FormCreate(Sender: TObject);
 var
-  i,j: Integer;
+  i: Integer;
 begin
   SetWindowLong(Application.Handle, GWL_EXSTYLE, WS_EX_TOOLWINDOW); {不在任务栏显示}
   Fstockname_strs := TStringList.Create;
@@ -322,7 +344,6 @@ var
   txt: TextFile;
   s: string;
   path: string;
-  Sstock_name: TStrings;
   SqlTb: TSQLiteTable;
 begin
   {
@@ -387,13 +408,13 @@ begin
     Strgrid_stock.Rows[i].Clear;
   Fstockname_strs.Clear;
   nbMain.Items.Clear;
-  lv_Smart.Clear;
+  //lv_Smart.Clear;
   bt_status(False);
 end;
 
 procedure TFrm_stockhq.btn_closeClick(Sender: TObject);
 begin
-  Panel7.Visible := False;
+   Panel9.Visible := False;
 end;
 
 procedure TFrm_stockhq.btn_dayClick(Sender: TObject);
@@ -536,6 +557,7 @@ begin
     sUrl := 'http://pifm.eastmoney.com/EM_Finance2014PictureInterface/Index.aspx?ID='+ sUrl + s_market +'&UnitWidth=-6&imageType=KXL&EF=&Formula=RSI&AT=&&type=W&token=44c9d251add88e27b65ed86506f6e5da';
 
   WebBrowser.Navigate(sUrl);
+  Timer_k.Enabled := True;
 end;
 
 function TFrm_stockhq.GetHTML(Url: string): string;
@@ -558,7 +580,7 @@ procedure TFrm_stockhq.GetStock(Url: string);
 //解析json
 var
   AJson, AJson_Result: TQJson;
-  sHTML, Stockid, StockName, ChangeRate, CurrPx: string;
+  sHTML: string;
   fRate: Double;
   i: Integer;
 begin
@@ -605,8 +627,8 @@ procedure TFrm_stockhq.GetStockType;
 var
   sHTML, URL, sUnixTime: string;
   AJson, AJson_Result, AJson_list: TQJson;
-  sTypeid, sType, sTypename, sDescription, sSuccessRate: string;
-  i, j: Integer;
+  sType: string;
+  i: Integer;
 begin
   sUnixTime := GetUnixTime();
   //获取智能选股列
@@ -728,7 +750,6 @@ end;
 procedure TFrm_stockhq.StringGrid_wudangDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 var
   Str: string;
-  r: TRect;
 begin
   Str := StringGrid_wudang.Cells[ACol, ARow];
   with StringGrid_wudang do
@@ -817,7 +838,7 @@ begin
   //changeRate:涨跌幅
   //code：股票代码
   //codeType：市场类型
-  //turnoverRate:
+  //turnoverRate: 换手率
   //changePx:
   //type:
   //lowPx: 最低价
@@ -909,11 +930,6 @@ begin
       subitems.add(categoryName);
     end;
   end;
-end;
-
-procedure TFrm_stockhq.WebBrowserEnter(Sender: TObject);
-begin
-  Panel7.Visible := False;
 end;
 
 procedure TFrm_stockhq.WMSysCommand(var msg: TMessage);
@@ -1068,7 +1084,7 @@ begin
     else if (Change_amt < 0) then
       Frm_stockhq.dxStatusBar.Panels[1].PanelStyle.Font.Color := clGreen;
   end
-  else if Fthread_stock = '399001' then //深圳指数
+  else if Fthread_stock = '399001' then //深证指数
   begin
     Frm_stockhq.dxStatusBar.Panels[3].Text := Current_Price + ' ' + Change_percent;
     if (Change_amt > 0) then

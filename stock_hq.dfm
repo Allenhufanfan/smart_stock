@@ -2,9 +2,10 @@ object Frm_stockhq: TFrm_stockhq
   Left = 390
   Top = 165
   BorderIcons = [biSystemMenu, biMinimize]
+  BorderStyle = bsSingle
   Caption = #26497#36895#34583#29275
-  ClientHeight = 634
-  ClientWidth = 786
+  ClientHeight = 644
+  ClientWidth = 796
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -20,8 +21,8 @@ object Frm_stockhq: TFrm_stockhq
   TextHeight = 13
   object dxStatusBar: TdxStatusBar
     Left = 0
-    Top = 614
-    Width = 786
+    Top = 624
+    Width = 796
     Height = 20
     Panels = <
       item
@@ -114,36 +115,44 @@ object Frm_stockhq: TFrm_stockhq
     Font.Height = -11
     Font.Name = 'Tahoma'
     Font.Style = [fsBold]
+    ExplicitTop = 614
+    ExplicitWidth = 786
   end
   object cxPageControl: TcxPageControl
     Left = 0
     Top = 60
-    Width = 786
-    Height = 554
+    Width = 796
+    Height = 564
     Align = alClient
     TabOrder = 5
-    Properties.ActivePage = cxTab_Smart
+    Properties.ActivePage = cxTab_stock
     Properties.CustomButtons.Buttons = <>
-    ClientRectBottom = 550
+    ExplicitWidth = 786
+    ExplicitHeight = 554
+    ClientRectBottom = 560
     ClientRectLeft = 4
-    ClientRectRight = 782
+    ClientRectRight = 792
     ClientRectTop = 4
     object cxTab_stock: TcxTabSheet
       Caption = #33258#36873#32929
       ImageIndex = 0
       TabVisible = False
+      ExplicitWidth = 778
+      ExplicitHeight = 546
       object Panel5: TPanel
         Left = 0
         Top = 0
-        Width = 778
-        Height = 546
+        Width = 788
+        Height = 556
         Align = alClient
         TabOrder = 0
+        ExplicitWidth = 778
+        ExplicitHeight = 546
         object Strgrid_stock: TStringGrid
           Left = 1
           Top = 1
-          Width = 571
-          Height = 315
+          Width = 581
+          Height = 325
           Margins.Right = 1
           Align = alClient
           ColCount = 4
@@ -162,14 +171,18 @@ object Frm_stockhq: TFrm_stockhq
           TabOrder = 0
           OnClick = Strgrid_stockClick
           OnDrawCell = Strgrid_stockDrawCell
+          ExplicitWidth = 571
+          ExplicitHeight = 315
         end
         object Panel6: TPanel
-          Left = 572
+          Left = 582
           Top = 1
           Width = 205
-          Height = 315
+          Height = 325
           Align = alRight
           TabOrder = 1
+          ExplicitLeft = 572
+          ExplicitHeight = 315
           object lbl_stock: TLabel
             AlignWithMargins = True
             Left = 4
@@ -221,12 +234,14 @@ object Frm_stockhq: TFrm_stockhq
         end
         object Panel7: TPanel
           Left = 1
-          Top = 316
-          Width = 776
+          Top = 326
+          Width = 786
           Height = 229
           Align = alBottom
           TabOrder = 2
           Visible = False
+          ExplicitTop = 316
+          ExplicitWidth = 776
           object Panel8: TPanel
             Left = 1
             Top = 1
@@ -274,25 +289,26 @@ object Frm_stockhq: TFrm_stockhq
           object Panel9: TPanel
             Left = 83
             Top = 1
-            Width = 692
+            Width = 702
             Height = 227
             Align = alClient
-            Caption = 'Panel9'
             TabOrder = 1
+            ExplicitWidth = 692
             object WebBrowser: TWebBrowser
               Left = 1
               Top = 1
-              Width = 690
+              Width = 700
               Height = 225
               Align = alClient
               TabOrder = 0
-              OnEnter = WebBrowserEnter
-              ExplicitLeft = 2
-              ExplicitWidth = 682
+              ExplicitLeft = 206
+              ExplicitTop = 44
+              ExplicitWidth = 300
+              ExplicitHeight = 150
               ControlData = {
-                4C00000050470000411700000000000000000000000000000000000000000000
+                4C00000059480000411700000000000000000000000000000000000000000000
                 000000004C000000000000000000000001000000E0D057007335CF11AE690800
-                2B2E126208000000000000004C0000000114020000000000C000000000000046
+                2B2E12620E000000000000004C0000000114020000000000C000000000000046
                 8000000000000000000000000000000000000000000000000000000000000000
                 00000000000000000100000000000000000000000000000000000000}
             end
@@ -304,6 +320,10 @@ object Frm_stockhq: TFrm_stockhq
       Caption = #36873#32929#31574#30053
       ImageIndex = 1
       TabVisible = False
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object nbMain: TdxNavBar
         Left = 0
         Top = 0
@@ -337,7 +357,6 @@ object Frm_stockhq: TFrm_stockhq
           Columns = <>
           ColumnClick = False
           HideSelection = False
-          Items.ItemData = {}
           RowSelect = True
           PopupMenu = PP_Smart
           TabOrder = 0
@@ -356,8 +375,8 @@ object Frm_stockhq: TFrm_stockhq
           object StaticText1: TStaticText
             Left = 81
             Top = 0
-            Width = 533
-            Height = 61
+            Width = 4
+            Height = 4
             Align = alClient
             Color = clWhite
             Font.Charset = ANSI_CHARSET
@@ -383,7 +402,7 @@ object Frm_stockhq: TFrm_stockhq
             object Label1: TLabel
               Left = 0
               Top = 0
-              Width = 81
+              Width = 65
               Height = 19
               ParentCustomHint = False
               Align = alTop
@@ -401,13 +420,12 @@ object Frm_stockhq: TFrm_stockhq
               ParentFont = False
               ParentShowHint = False
               ShowHint = False
-              ExplicitWidth = 65
             end
             object Label2: TLabel
               Left = 0
               Top = 19
-              Width = 81
-              Height = 42
+              Width = 7
+              Height = 31
               ParentCustomHint = False
               Align = alClient
               Alignment = taCenter
@@ -423,8 +441,6 @@ object Frm_stockhq: TFrm_stockhq
               ParentFont = False
               ParentShowHint = False
               ShowHint = False
-              ExplicitWidth = 7
-              ExplicitHeight = 31
             end
           end
         end
@@ -434,6 +450,10 @@ object Frm_stockhq: TFrm_stockhq
       Caption = #31995#32479#35774#32622
       ImageIndex = 2
       TabVisible = False
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel4: TPanel
         Left = 0
         Top = 0
@@ -562,6 +582,7 @@ object Frm_stockhq: TFrm_stockhq
     Top = 8
   end
   object TrayIcon1: TTrayIcon
+    Hint = #26497#36895#34583#29275
     PopupMenu = PopupMenu1
     Visible = True
     OnDblClick = TrayIcon1DblClick
@@ -669,9 +690,9 @@ object Frm_stockhq: TFrm_stockhq
       WholeRow = False
     end
     object dxBarBtn_stock: TdxBarLargeButton
-      Caption = #33258#36873#32929
+      Caption = #33258#36873#32929#31080
       Category = 0
-      Hint = #33258#36873#32929
+      Hint = #33258#36873#32929#31080
       Visible = ivAlways
       LargeGlyph.Data = {
         36100000424D3610000000000000360000002800000020000000200000000100
@@ -808,9 +829,9 @@ object Frm_stockhq: TFrm_stockhq
       AutoGrayScale = False
     end
     object dxBarBtn_smart: TdxBarLargeButton
-      Caption = #36873#32929#31574#30053
+      Caption = #31574#30053#36873#32929
       Category = 0
-      Hint = #36873#32929#31574#30053
+      Hint = #31574#30053#36873#32929
       Visible = ivAlways
       LargeGlyph.Data = {
         36100000424D3610000000000000360000002800000020000000200000000100
@@ -1233,7 +1254,8 @@ object Frm_stockhq: TFrm_stockhq
     end
   end
   object Timer_k: TTimer
-    Interval = 30000
+    Enabled = False
+    Interval = 5000
     OnTimer = Timer_kTimer
     Left = 161
     Top = 143
