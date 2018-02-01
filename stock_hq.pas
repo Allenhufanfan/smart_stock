@@ -8,7 +8,7 @@ uses
   IdIOHandlerSocket, IdIOHandlerStack, IdSSL, IdSSLOpenSSL, IdBaseComponent,
   IdComponent, IdTCPConnection, IdTCPClient, Vcl.StdCtrls, IdHTTP, DateUtils,
   qjson, Vcl.ComCtrls, Vcl.ExtCtrls, cxGraphics, cxControls, dxNavBar,
-  dxNavBarCollns, cxLookAndFeels, cxLookAndFeelPainters,Winapi.ShellAPI,
+  dxNavBarCollns, cxLookAndFeels, cxLookAndFeelPainters, Winapi.ShellAPI,
   dxStatusBar, dxBarBuiltInMenu, cxPC, Vcl.Menus, Vcl.Grids, StrUtils, dxBar,
   cxClasses, Vcl.OleCtrls, SHDocVw, SQLiteTable3, Vcl.ActnList;
 
@@ -27,6 +27,8 @@ type
     constructor Create(time: Integer);
     procedure SplitString(sHTML_Text: string);
     procedure UpdateGrid;
+    //弹窗提醒
+    procedure SetNotice(Fstkcode, Fstkname, Fcurrent_Price, Fchange_rate: string);
   end;
 
 type
@@ -91,9 +93,12 @@ type
     N1: TMenuItem;
     N2: TMenuItem;
     WebBrowser: TWebBrowser;
+    N3: TMenuItem;
+    Act_Noitce: TAction;
     procedure Act_AddExecute(Sender: TObject);
     procedure Act_browserExecute(Sender: TObject);
     procedure Act_DelExecute(Sender: TObject);
+    procedure Act_NoitceExecute(Sender: TObject);
     procedure Act_SmartExecute(Sender: TObject);
     procedure Act_UpdExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -143,12 +148,13 @@ type
 
 var
   Frm_stockhq: TFrm_stockhq;
-  SqlDb : TSQLiteDatabase;
+  SqlDb: TSQLiteDatabase;
 
 implementation
 
 {$R *.dfm}
-uses setStkSql, USetStk;
+uses
+  setStkSql, USetStk, UNotice;
 
 procedure TFrm_stockhq.Act_AddExecute(Sender: TObject);
 begin
@@ -199,7 +205,7 @@ end;
 procedure TFrm_stockhq.Act_DelExecute(Sender: TObject);
 var
   Rowindex: integer;
-  sStkCode : string;  //证券名称
+  sStkCode: string;  //证券名称
 begin
   Rowindex := Strgrid_stock.Row; //获取行索引
   if Rowindex > 0 then
@@ -208,6 +214,34 @@ begin
     DelStock_sql(sStkCode);
   end;
   dxBarBtn_refreshClick(nil);
+end;
+
+procedure TFrm_stockhq.Act_NoitceExecute(Sender: TObject);
+var
+  Rowindex: integer;
+  sStkName: string;  //证券名称
+  sStkCode: string;  //证券名称
+  sChosenPx: string; //入选价格
+  sMsg: string;
+begin
+  Rowindex := Strgrid_stock.Row; //获取行索引
+  if Rowindex > 0 then
+  begin
+    sStkCode := Strgrid_stock.Cells[1, Rowindex];
+    sStkName := Strgrid_stock.Cells[2, Rowindex];
+    sChosenPx := Strgrid_stock.Cells[6, Rowindex];
+    sMsg := sStkName + '(' + sStkCode + ')当前价：' + sChosenPx;
+    frmNotice := TfrmNotice.Create(self);
+    try
+      frmNotice.Fstock := sStkCode;
+      frmNotice.lblMsg.Caption := smsg;
+      frmNotice.GetNotice(sStkCode);
+      if frmNotice.ShowModal = mrCancel then
+        Exit;
+    finally
+      frmNotice.Free;
+    end;
+  end;
 end;
 
 procedure TFrm_stockhq.Act_SmartExecute(Sender: TObject);
@@ -239,8 +273,8 @@ end;
 procedure TFrm_stockhq.Act_UpdExecute(Sender: TObject);
 var
   Rowindex: integer;
-  sStkName : string;  //证券名称
-  sStkCode : string;  //证券名称
+  sStkName: string;  //证券名称
+  sStkCode: string;  //证券名称
   sChosenPx: string; //入选价格
 begin
   Rowindex := Strgrid_stock.Row; //获取行索引
@@ -328,13 +362,12 @@ begin
 
   lv_Smart.Columns.Items[9].Caption := '所属主题';
   //ListView1.Columns.Items[6].Width := 150;
-
   lv_Smart.Columns.Items[0].Width := 0;
   lv_Smart.Columns.Items[5].Width := 0;
   lv_Smart.ViewStyle := vsreport;
   lv_Smart.GridLines := False;
 
-  lbl_stock.Font.Color := RGB(0,85,162);
+  lbl_stock.Font.Color := RGB(0, 85, 162);
   GetStockType;
 end;
 
@@ -369,7 +402,6 @@ begin
     SqlTb.Next;
   end;
   //Fstockname_strs.CommaText := s;
-
   for i := 0 to Fstockname_strs.Count - 1 do
   begin
     Strgrid_stock.Cells[1, i + 1] := Fstockname_strs[i];
@@ -414,7 +446,7 @@ end;
 
 procedure TFrm_stockhq.btn_closeClick(Sender: TObject);
 begin
-   Panel9.Visible := False;
+  Panel7.Visible := False;
 end;
 
 procedure TFrm_stockhq.btn_dayClick(Sender: TObject);
@@ -520,6 +552,8 @@ end;
 procedure TFrm_stockhq.FormShow(Sender: TObject);
 begin
   dxBarBtn_refreshClick(nil);
+  //重置股票提醒标志
+  ResetStockNoticeFlag_sql;
 end;
 
 procedure TFrm_stockhq.GetChart(sUrl: string; flag: Integer);
@@ -550,11 +584,11 @@ begin
     s_market := '1';
 
   if flag = 1 then    //分时图
-    sUrl := 'http://pifm.eastmoney.com/EM_Finance2014PictureInterface/Index.aspx?id=' + sUrl + s_market +'&imageType=r&token=44c9d251add88e27b65ed86506f6e5da'
+    sUrl := 'http://pifm.eastmoney.com/EM_Finance2014PictureInterface/Index.aspx?id=' + sUrl + s_market + '&imageType=r&token=44c9d251add88e27b65ed86506f6e5da'
   else if flag = 2 then   //日K
-    sUrl := 'http://pifm.eastmoney.com/EM_Finance2014PictureInterface/Index.aspx?ID='+ sUrl + s_market +'&UnitWidth=-6&imageType=KXL&EF=&Formula=RSI&AT=&&type=&token=44c9d251add88e27b65ed86506f6e5da'
+    sUrl := 'http://pifm.eastmoney.com/EM_Finance2014PictureInterface/Index.aspx?ID=' + sUrl + s_market + '&UnitWidth=-6&imageType=KXL&EF=&Formula=RSI&AT=&&type=&token=44c9d251add88e27b65ed86506f6e5da'
   else //周K
-    sUrl := 'http://pifm.eastmoney.com/EM_Finance2014PictureInterface/Index.aspx?ID='+ sUrl + s_market +'&UnitWidth=-6&imageType=KXL&EF=&Formula=RSI&AT=&&type=W&token=44c9d251add88e27b65ed86506f6e5da';
+    sUrl := 'http://pifm.eastmoney.com/EM_Finance2014PictureInterface/Index.aspx?ID=' + sUrl + s_market + '&UnitWidth=-6&imageType=KXL&EF=&Formula=RSI&AT=&&type=W&token=44c9d251add88e27b65ed86506f6e5da';
 
   WebBrowser.Navigate(sUrl);
   Timer_k.Enabled := True;
@@ -722,7 +756,10 @@ begin
 
   with Strgrid_stock.Canvas do
   begin
-    if (gdSelected in State) then Brush.Color := RGB(203,226,253) else Brush.Color := clWhite;
+    if (gdSelected in State) then
+      Brush.Color := RGB(203, 226, 253)
+    else
+      Brush.Color := clWhite;
     FillRect(Rect);
     Pen.Width := 1;
     Pen.Color := clWhite;
@@ -732,9 +769,9 @@ begin
     Font.Name := '微软雅黑';
     //Font.Style := [fsBold];  //加粗
     //if (ARow > 0) and (Acol <> 5) and (Acol <> 1) then
-    if (ARow > 0)then
+    if (ARow > 0) then
     begin
-      if(CompareStr(Strgrid_stock.Cells[3, ARow], Strgrid_stock.Cells[8, ARow]) > 0) then
+      if (CompareStr(Strgrid_stock.Cells[3, ARow], Strgrid_stock.Cells[8, ARow]) > 0) then
         Font.Color := clred //涨|字体颜色为红的
       else if (CompareStr(Strgrid_stock.Cells[3, ARow], Strgrid_stock.Cells[8, ARow]) < 0) then
         Font.Color := clGreen //跌|字体颜色为绿的
@@ -787,7 +824,7 @@ begin
    Timer_k.Enabled := True;
 
 }
-  if (Check_Kflag.Checked) and (Panel7.Visible)then
+  if (Check_Kflag.Checked) and (Panel7.Visible) then
   begin
     WebBrowser.Refresh;
   end;
@@ -831,7 +868,7 @@ end;
 procedure TFrm_stockhq.Updlistview(Ajson: TQJson);
 var
   Stockid, StockName, ChangeRate, CurrPx, chosenTime: string;
-  chosenChangeRate, chosenPx, categoryName : string;
+  chosenChangeRate, chosenPx, categoryName: string;
   i: Integer;
 begin
   //openPx : 今开
@@ -858,8 +895,8 @@ begin
   chosenTime := Ajson.ValueByName('chosenTime', '');
   //chosenChangeRate := Format('%.2f%s', [(Ajson.ItemByName('chosenChangeRate').AsFloat) * 100, '%']);
   chosenChangeRate := Ajson.ValueByName('chosenChangeRate', '0');
-  chosenPx := Ajson.ValueByName('chosenPx','0');
-  categoryName := Ajson.ValueByName('categoryName','');
+  chosenPx := Ajson.ValueByName('chosenPx', '0');
+  categoryName := Ajson.ValueByName('categoryName', '');
 
   if chosenChangeRate = '0' then
   begin
@@ -981,6 +1018,39 @@ begin
   end;
 end;
 
+procedure TRevThread.SetNotice(Fstkcode, Fstkname, Fcurrent_Price, Fchange_rate: string);
+var
+  FNotice_Buyflag: string;
+  FNotice_Saleflag: string;
+  FNotice_Rateflag: string;
+  sMsg: string;
+  sDate: string;
+begin
+  sDate := FormatdateTime('yyyy-mm-dd hh:mm', now);
+  FNotice_Buyflag := GetStockNotice_filed(Fstkcode, 'buy_flag');
+  FNotice_Saleflag := GetStockNotice_filed(Fstkcode, 'sale_flag');
+  FNotice_Rateflag := GetStockNotice_filed(Fstkcode, 'rate_flag');
+  if (FNotice_Buyflag = '0') and (FNotice_Saleflag = '0') and (FNotice_Rateflag = '0') then
+    Exit;
+  if (FNotice_Buyflag <= Fcurrent_Price) and (FNotice_Buyflag <> '') then
+  begin
+    sMsg := '你关注的股票' + Fstkname + '(' + Fstkcode + '),于 ' + sDate + ' 达到' + Fcurrent_Price + ',低于购买目标价' + FNotice_Buyflag;
+    ShowNotice(sMsg, Fstkcode, 'buy_flag');
+  end;
+
+  if FNotice_Saleflag >= Fcurrent_Price then
+  begin
+    sMsg := '你关注的股票' + Fstkname + '(' + Fstkcode + '),于 ' + sDate + ' 达到' + Fcurrent_Price + ',超过卖出目标价' + FNotice_Saleflag;
+    ShowNotice(sMsg, Fstkcode, 'sale_flag');
+  end;
+
+  if StrToFloat(FNotice_Rateflag) <= Abs(StrToFloat(Fchange_rate)) then
+  begin
+    sMsg := '你关注的股票' + Fstkname + '(' + Fstkcode + '),于 ' + sDate + ' 达到' + Fcurrent_Price + ',涨跌幅为' + Fchange_rate + '%,' + '超过' + FNotice_Rateflag + '%';
+    ShowNotice(sMsg, Fstkcode, 'rate_flag');
+  end;
+end;
+
 procedure TRevThread.SplitString(sHTML_Text: string);
 var
   i: Integer;
@@ -1010,12 +1080,13 @@ procedure TRevThread.UpdateGrid;
 var
   SqlTb: TSQLiteTable;
   Change_percent: string;
-  Current_Price : string;
-  Yest_Price : string;
+  Current_Price: string;
+  Yest_Price: string;
   Change_amt: Double;
+  Change_Rate: string;
   Change_flag: string;
   ChosenTime: string; //入选时间
-  ChosenChangeRate: string;//累计涨跌幅
+  ChosenChangeRate: string; //累计涨跌幅
   ChosenPx: string; //入选价格
 begin
   Current_Price := Format('%.2f', [StrToFloat(Fstocprice_strs[3])]);  //当前价格
@@ -1024,9 +1095,10 @@ begin
   Frm_stockhq.Strgrid_stock.Cells[3, nColumn + 1] := Current_Price;  //当前价格
   Frm_stockhq.Strgrid_stock.Cells[8, nColumn + 1] := Yest_Price;  //昨日价格
   Change_amt := StrToFloat(Fstocprice_strs[3]) - StrToFloat(Fstocprice_strs[2]);
+  Change_Rate := Format('%.2f', [Change_amt * 100 / StrToFloat(Fstocprice_strs[2])]);
   if (Change_amt > 0) then
     Change_flag := '+';
-  Change_percent := Format('%s%.2f%s%.2f%s', [Change_flag, Change_amt, '(', Change_amt * 100 / StrToFloat(Fstocprice_strs[2]), '%)']);
+  Change_percent := Format('%s%.2f%s%s%s', [Change_flag, Change_amt, '(', Change_Rate, '%)']);
   Frm_stockhq.Strgrid_stock.Cells[4, nColumn + 1] := Change_percent;  //涨跌幅
   //Frm_stockhq.Strgrid_stock.Cells[5, nColumn + 1] := FormatDateTime('hh时nn分ss秒', now());
 
@@ -1075,7 +1147,10 @@ begin
     Frm_stockhq.StringGrid_wudang.Cells[1, 5] := Fstocprice_strs[21]; //卖一价格
   end;
 
-  //更新指数
+  //提醒功能
+  SetNotice(Fthread_stock, Fstocprice_strs[0], Current_Price, Change_Rate);
+
+  //更新状态栏指数
   if Fthread_stock = '000001' then      //上证指数
   begin
     Frm_stockhq.dxStatusBar.Panels[1].Text := Current_Price + ' ' + Change_percent;

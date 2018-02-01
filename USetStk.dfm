@@ -1,7 +1,7 @@
 object FrmSetStk: TFrmSetStk
   Left = 0
   Top = 0
-  BorderIcons = [biSystemMenu, biMinimize]
+  BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = #33258#36873#32929#35774#32622
   ClientHeight = 186

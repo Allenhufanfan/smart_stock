@@ -1,9 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <BorlandProject>
 	<Transactions>
-    <Transaction>1899-12-30 00:00:00.000.399,C:\Documents and Settings\Administrator\桌面\test_stock\stock_hq.pas=C:\Documents and Settings\Administrator\My Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.933,C:\Users\hufan\Desktop\xe_project\frame\UFrame.pas=</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.701,=F:\git_project\smart_stock\setStkSql.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.702,F:\git_project\smart_stock\Unit1.dfm=F:\git_project\smart_stock\UNotice.dfm</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.950,=C:\Users\hufan\Desktop\xe_project\frame\UFrame.pas</Transaction>
     <Transaction>1899-12-30 00:00:00.000.399,C:\Documents and Settings\Administrator\桌面\test_stock\stock_hq.dfm=C:\Documents and Settings\Administrator\My Documents\RAD Studio\Projects\Unit1.dfm</Transaction>
     <Transaction>1899-12-30 00:00:00.000.758,=C:\Documents and Settings\Administrator\My Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.072,F:\git_project\smart_stock\USetStk.dfm=F:\git_project\smart_stock\Unit1.dfm</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.399,C:\Documents and Settings\Administrator\桌面\test_stock\stock_hq.pas=C:\Documents and Settings\Administrator\My Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.814,=F:\git_project\smart_stock\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.804,=F:\git_project\smart_stock\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.593,=F:\git_project\smart_stock\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.188,=F:\git_project\smart_stock\Unit1.pas</Transaction>
     <Transaction>1899-12-30 00:00:00.000.977,C:\Documents and Settings\Administrator\桌面\test_stock\stock.dproj=C:\Documents and Settings\Administrator\My Documents\RAD Studio\Projects\Project1.dproj</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.072,F:\git_project\smart_stock\USetStk.pas=F:\git_project\smart_stock\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.702,F:\git_project\smart_stock\Unit1.pas=F:\git_project\smart_stock\UNotice.pas</Transaction>
   </Transactions>
 </BorlandProject>

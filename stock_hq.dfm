@@ -115,8 +115,6 @@ object Frm_stockhq: TFrm_stockhq
     Font.Height = -11
     Font.Name = 'Tahoma'
     Font.Style = [fsBold]
-    ExplicitTop = 614
-    ExplicitWidth = 786
   end
   object cxPageControl: TcxPageControl
     Left = 0
@@ -127,8 +125,6 @@ object Frm_stockhq: TFrm_stockhq
     TabOrder = 5
     Properties.ActivePage = cxTab_stock
     Properties.CustomButtons.Buttons = <>
-    ExplicitWidth = 786
-    ExplicitHeight = 554
     ClientRectBottom = 560
     ClientRectLeft = 4
     ClientRectRight = 792
@@ -137,8 +133,6 @@ object Frm_stockhq: TFrm_stockhq
       Caption = #33258#36873#32929
       ImageIndex = 0
       TabVisible = False
-      ExplicitWidth = 778
-      ExplicitHeight = 546
       object Panel5: TPanel
         Left = 0
         Top = 0
@@ -146,8 +140,6 @@ object Frm_stockhq: TFrm_stockhq
         Height = 556
         Align = alClient
         TabOrder = 0
-        ExplicitWidth = 778
-        ExplicitHeight = 546
         object Strgrid_stock: TStringGrid
           Left = 1
           Top = 1
@@ -171,8 +163,6 @@ object Frm_stockhq: TFrm_stockhq
           TabOrder = 0
           OnClick = Strgrid_stockClick
           OnDrawCell = Strgrid_stockDrawCell
-          ExplicitWidth = 571
-          ExplicitHeight = 315
         end
         object Panel6: TPanel
           Left = 582
@@ -181,8 +171,6 @@ object Frm_stockhq: TFrm_stockhq
           Height = 325
           Align = alRight
           TabOrder = 1
-          ExplicitLeft = 572
-          ExplicitHeight = 315
           object lbl_stock: TLabel
             AlignWithMargins = True
             Left = 4
@@ -240,8 +228,6 @@ object Frm_stockhq: TFrm_stockhq
           Align = alBottom
           TabOrder = 2
           Visible = False
-          ExplicitTop = 316
-          ExplicitWidth = 776
           object Panel8: TPanel
             Left = 1
             Top = 1
@@ -293,7 +279,6 @@ object Frm_stockhq: TFrm_stockhq
             Height = 227
             Align = alClient
             TabOrder = 1
-            ExplicitWidth = 692
             object WebBrowser: TWebBrowser
               Left = 1
               Top = 1
@@ -301,10 +286,8 @@ object Frm_stockhq: TFrm_stockhq
               Height = 225
               Align = alClient
               TabOrder = 0
-              ExplicitLeft = 206
-              ExplicitTop = 44
-              ExplicitWidth = 300
-              ExplicitHeight = 150
+              ExplicitLeft = 2
+              ExplicitTop = 2
               ControlData = {
                 4C00000059480000411700000000000000000000000000000000000000000000
                 000000004C000000000000000000000001000000E0D057007335CF11AE690800
@@ -328,7 +311,7 @@ object Frm_stockhq: TFrm_stockhq
         Left = 0
         Top = 0
         Width = 158
-        Height = 546
+        Height = 556
         Align = alLeft
         Constraints.MinWidth = 120
         ActiveGroupIndex = -1
@@ -338,8 +321,8 @@ object Frm_stockhq: TFrm_stockhq
       object Panel1: TPanel
         Left = 158
         Top = 0
-        Width = 620
-        Height = 546
+        Width = 630
+        Height = 556
         Align = alClient
         Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
@@ -351,8 +334,8 @@ object Frm_stockhq: TFrm_stockhq
         object lv_Smart: TListView
           Left = 1
           Top = 1
-          Width = 618
-          Height = 479
+          Width = 628
+          Height = 489
           Align = alClient
           Columns = <>
           ColumnClick = False
@@ -365,8 +348,8 @@ object Frm_stockhq: TFrm_stockhq
         end
         object Panel2: TPanel
           Left = 1
-          Top = 480
-          Width = 618
+          Top = 490
+          Width = 628
           Height = 65
           Align = alBottom
           BevelOuter = bvNone
@@ -457,7 +440,7 @@ object Frm_stockhq: TFrm_stockhq
       object Panel4: TPanel
         Left = 0
         Top = 0
-        Width = 778
+        Width = 788
         Height = 91
         Align = alTop
         BevelOuter = bvSpace
@@ -1383,6 +1366,9 @@ object Frm_stockhq: TFrm_stockhq
         0002000000030000000400000004000000040000000400000004000000040000
         0004000000040000000400000005000000050000000300000001}
     end
+    object N3: TMenuItem
+      Action = Act_Noitce
+    end
     object N1: TMenuItem
       Action = Act_browser
       AutoHotkeys = maManual
@@ -1446,6 +1432,10 @@ object Frm_stockhq: TFrm_stockhq
     object Act_browser: TAction
       Caption = #38634#29699#32593#25171#24320'(&B)'
       OnExecute = Act_browserExecute
+    end
+    object Act_Noitce: TAction
+      Caption = #25552#37266
+      OnExecute = Act_NoitceExecute
     end
   end
   object PP_Smart: TPopupMenu
