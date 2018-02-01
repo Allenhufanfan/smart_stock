@@ -303,10 +303,6 @@ object Frm_stockhq: TFrm_stockhq
       Caption = #36873#32929#31574#30053
       ImageIndex = 1
       TabVisible = False
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object nbMain: TdxNavBar
         Left = 0
         Top = 0
@@ -358,8 +354,8 @@ object Frm_stockhq: TFrm_stockhq
           object StaticText1: TStaticText
             Left = 81
             Top = 0
-            Width = 4
-            Height = 4
+            Width = 543
+            Height = 61
             Align = alClient
             Color = clWhite
             Font.Charset = ANSI_CHARSET
@@ -385,7 +381,7 @@ object Frm_stockhq: TFrm_stockhq
             object Label1: TLabel
               Left = 0
               Top = 0
-              Width = 65
+              Width = 81
               Height = 19
               ParentCustomHint = False
               Align = alTop
@@ -403,12 +399,13 @@ object Frm_stockhq: TFrm_stockhq
               ParentFont = False
               ParentShowHint = False
               ShowHint = False
+              ExplicitWidth = 65
             end
             object Label2: TLabel
               Left = 0
               Top = 19
-              Width = 7
-              Height = 31
+              Width = 81
+              Height = 42
               ParentCustomHint = False
               Align = alClient
               Alignment = taCenter
@@ -424,6 +421,8 @@ object Frm_stockhq: TFrm_stockhq
               ParentFont = False
               ParentShowHint = False
               ShowHint = False
+              ExplicitWidth = 7
+              ExplicitHeight = 31
             end
           end
         end
@@ -433,10 +432,6 @@ object Frm_stockhq: TFrm_stockhq
       Caption = #31995#32479#35774#32622
       ImageIndex = 2
       TabVisible = False
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Panel4: TPanel
         Left = 0
         Top = 0

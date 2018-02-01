@@ -1,4 +1,4 @@
-object FrmSetStk: TFrmSetStk
+object frmSetStk: TfrmSetStk
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu]

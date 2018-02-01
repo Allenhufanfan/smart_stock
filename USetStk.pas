@@ -9,7 +9,7 @@ uses
   IdTCPConnection, IdTCPClient, IdHTTP, Vcl.StdCtrls, Vcl.ExtCtrls, cxTextEdit;
 
 type
-  TFrmSetStk = class(TForm)
+  TfrmSetStk = class(TForm)
     Panel1: TPanel;
     Label2: TLabel;
     btn_Sure: TButton;
@@ -33,19 +33,19 @@ type
   end;
 
 var
-  FrmSetStk: TFrmSetStk;
+  frmSetStk: TfrmSetStk;
 
 implementation
 
 uses setStkSql;
 {$R *.dfm}
 
-procedure TFrmSetStk.btn_CancelClick(Sender: TObject);
+procedure TfrmSetStk.btn_CancelClick(Sender: TObject);
 begin
    Close;
 end;
 
-procedure TFrmSetStk.btn_SureClick(Sender: TObject);
+procedure TfrmSetStk.btn_SureClick(Sender: TObject);
 var
   sDate : string;
   bSqlResult : Boolean;
@@ -67,7 +67,7 @@ begin
    end;
 end;
 
-procedure TFrmSetStk.edt_pxKeyPress(Sender: TObject; var Key: Char);
+procedure TfrmSetStk.edt_pxKeyPress(Sender: TObject; var Key: Char);
 begin
   if not (key in ['0'..'9', '.', #8]) then
     key := #0;
@@ -75,19 +75,19 @@ begin
     key := #0;
 end;
 
-procedure TFrmSetStk.edt__stkChange(Sender: TObject);
+procedure TfrmSetStk.edt__stkChange(Sender: TObject);
 begin
   if (Length(Trim(edt__stk.Text)) = 6) then
     GetStock(Trim(edt__stk.Text));
 end;
 
-procedure TFrmSetStk.edt__stkKeyPress(Sender: TObject; var Key: Char);
+procedure TfrmSetStk.edt__stkKeyPress(Sender: TObject; var Key: Char);
 begin
   if (Length(Trim(edt__stk.Text)) > 5) and not (Key = #08) then
     key := #0;
 end;
 
-procedure TFrmSetStk.GetStock(sStkcode: string);
+procedure TfrmSetStk.GetStock(sStkcode: string);
 var
   sHTML, URL, sUnixTime: string;
   sStkprice_strs: TStrings;
@@ -125,7 +125,7 @@ begin
   end;
 end;
 
-function TFrmSetStk.UnicodeToChinese(inputstr: string): string;
+function TfrmSetStk.UnicodeToChinese(inputstr: string): string;
 var
   index: Integer;
   temp, top, last: string;

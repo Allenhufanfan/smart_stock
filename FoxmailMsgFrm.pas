@@ -409,7 +409,7 @@ begin
   with tmDelay do
   begin
     Enabled := False;
-    Interval := 5000;
+    Interval := 6000;
     OnTimer := tmDelayTimer;
   end;
 end;

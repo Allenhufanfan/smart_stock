@@ -89,10 +89,9 @@ begin
     //先判断记录是否存在，不存在插入，存在则更新
     SqlTb := SqlDb.GetTable('select * from stock_notice where stkcode = ' + QuotedStr(sStkcode));
     if SqlTb.Count > 0 then
-      Sqlstr := 'update stock_notice set stkbuy = ' + sStkBuy + ', stksale = ' + sStkSale + ', stkrate = ' + sStkRate + ' where stkcode = ' + QuotedStr(sStkcode)
+      Sqlstr := 'update stock_notice set stkbuy = ' + QuotedStr(sStkBuy) + ', stksale = ' + QuotedStr(sStkSale) + ', stkrate = ' + QuotedStr(sStkRate) + ' where stkcode = ' + QuotedStr(sStkcode)
     else
-      Sqlstr := 'insert into stock_notice (stkcode,stkbuy,stksale,stkrate) values ('
-                 + QuotedStr(sStkcode) + ',' + QuotedStr(sStkBuy) + ',' + QuotedStr(sStkSale) + ',' + QuotedStr(sStkRate) + ')';
+      Sqlstr := 'insert into stock_notice (stkcode,stkbuy,stksale,stkrate) values (' + QuotedStr(sStkcode) + ',' + QuotedStr(sStkBuy) + ',' + QuotedStr(sStkSale) + ',' + QuotedStr(sStkRate) + ')';
     try
       SqlDb.ExecSQL(UTF8Encode(Sqlstr));
     except
@@ -145,18 +144,21 @@ var
   Sqlstr: string;
 begin
   SqlDb := TSQLiteDatabase.Create('stock.db');
-  if SqlDb.TableExists('stock_notice') then
-  begin
-    //重置提醒标志
-    Sqlstr := 'update stock_notice set ' + Ffiledname + '= ''1'' where stkcode =' + QuotedStr(Fstkcode);
-    try
-      SqlDb.ExecSQL(UTF8Encode(Sqlstr));
-    except
-      Exit;
-    end;
-  end;
+  SqlTb := SqlDb.GetTable('select * from stock_notice where stkcode =' + QuotedStr(Fstkcode) + ' and ' + Ffiledname + ' = ''1''');
+  if SqlTb.Count > 0 then
+    Exit;
+
   //弹出窗口
-  ShowInfo(FMsg);
+  ShowWarning(FMsg);
+
+  //重置提醒标志
+  Sqlstr := 'update stock_notice set ' + Ffiledname + '= ''1'' where stkcode =' + QuotedStr(Fstkcode);
+  try
+    SqlDb.ExecSQL(UTF8Encode(Sqlstr));
+  except
+    Exit;
+  end;
 end;
+
 end.
 

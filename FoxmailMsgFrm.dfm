@@ -3,8 +3,8 @@ object MsgForm: TMsgForm
   Top = 206
   BorderStyle = bsNone
   Caption = #28040#24687#26174#31034#31383#20307
-  ClientHeight = 116
-  ClientWidth = 160
+  ClientHeight = 127
+  ClientWidth = 194
   Color = clWhite
   Font.Charset = GB2312_CHARSET
   Font.Color = clWindowText
@@ -19,11 +19,19 @@ object MsgForm: TMsgForm
   PixelsPerInch = 96
   TextHeight = 12
   object lblMsg: TLabel
-    Left = 8
+    Left = 7
     Top = 46
-    Width = 144
-    Height = 67
+    Width = 182
+    Height = 79
+    Margins.Left = 5
+    Margins.Right = 5
     AutoSize = False
+    Font.Charset = GB2312_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -14
+    Font.Name = #23435#20307
+    Font.Style = []
+    ParentFont = False
     Transparent = True
     WordWrap = True
     OnClick = FormClick

@@ -5,7 +5,7 @@
 			<FrameworkType>VCL</FrameworkType>
 			<MainSource>stock.dpr</MainSource>
 			<Base>True</Base>
-			<Config Condition="'$(Config)'==''">Debug</Config>
+			<Config Condition="'$(Config)'==''">Release</Config>
 			<Platform Condition="'$(Platform)'==''">Win32</Platform>
 			<TargetedPlatforms>1</TargetedPlatforms>
 			<AppType>Application</AppType>
@@ -104,7 +104,7 @@
 			</DCCReference>
 			<DCCReference Include="setStkSql.pas"/>
 			<DCCReference Include="USetStk.pas">
-				<Form>FrmSetStk</Form>
+				<Form>frmSetStk</Form>
 			</DCCReference>
 			<DCCReference Include="UNotice.pas">
 				<Form>frmNotice</Form>
