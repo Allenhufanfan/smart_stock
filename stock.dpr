@@ -5,7 +5,8 @@ uses
   stock_hq in 'stock_hq.pas' {Frm_stockhq},
   setStkSql in 'setStkSql.pas',
   USetStk in 'USetStk.pas' {frmSetStk},
-  UNotice in 'UNotice.pas' {frmNotice};
+  UNotice in 'UNotice.pas' {frmNotice},
+  FoxmailMsgFrm in 'FoxmailMsgFrm.pas' {MsgForm};
 
 {$R *.res}
 

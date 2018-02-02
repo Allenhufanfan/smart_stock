@@ -20,16 +20,20 @@ procedure ResetStockNoticeFlag_sql();
 //获取提醒字段
 function GetStockNotice_filed(sStkcode, sFiledname: string): string;
 
-procedure ShowNotice(FMsg, Fstkcode, Ffiledname: string);
+//显示提醒
+procedure ShowNotice(FlblMsg, FMsg, Fstkcode, Ffiledname: string);
 
+{
 var
   SqlDb: TSQLiteDatabase;
+}
 
 implementation
 
 function SetStock_sql(sStkcode, sStkname, dStkpx: string): Boolean;
 var
   SqlTb: TSQLiteTable;
+  SqlDb: TSQLiteDatabase;
   TableCreateStr: string;
   sDate: string;
   Sqlstr: string;
@@ -47,15 +51,17 @@ begin
       Sqlstr := 'insert into stock values (' + QuotedStr(sStkcode) + ',' + QuotedStr(sStkname) + ',' + QuotedStr(sDate) + ',' + dStkpx + ')';
     try
       SqlDb.ExecSQL(UTF8Encode(Sqlstr));
-    except
-      Exit;
+      Result := True;
+    finally
+      SqlTb.Free;
+      SqlDb.Free;
     end;
   end;
-  Result := True;
 end;
 
 function DelStock_sql(sStkcode: string): Boolean;
 var
+  SqlDb: TSQLiteDatabase;
   SqlTb: TSQLiteTable;
   Sqlstr: string;
 begin
@@ -70,14 +76,16 @@ begin
   end;
   try
     SqlDb.ExecSQL(UTF8Encode(Sqlstr));
-  except
-    Exit;
+    Result := True;
+  finally
+    SqlTb.Free;
+    SqlDb.Free;
   end;
-  Result := True;
 end;
 
 function SetStockNotice_sql(sStkcode, sStkBuy, sStkSale, sStkRate: string): Boolean;
 var
+  SqlDb: TSQLiteDatabase;
   SqlTb: TSQLiteTable;
   TableCreateStr: string;
   Sqlstr: string;
@@ -94,16 +102,17 @@ begin
       Sqlstr := 'insert into stock_notice (stkcode,stkbuy,stksale,stkrate) values (' + QuotedStr(sStkcode) + ',' + QuotedStr(sStkBuy) + ',' + QuotedStr(sStkSale) + ',' + QuotedStr(sStkRate) + ')';
     try
       SqlDb.ExecSQL(UTF8Encode(Sqlstr));
-    except
-      Exit;
+      Result := True;
+    finally
+      SqlTb.Free;
+      SqlDb.Free;
     end;
   end;
-  Result := True;
 end;
 
 procedure ResetStockNoticeFlag_sql();
 var
-  SqlTb: TSQLiteTable;
+  SqlDb: TSQLiteDatabase;
   TableCreateStr: string;
   Sqlstr: string;
 begin
@@ -114,17 +123,16 @@ begin
     Sqlstr := 'update stock_notice set buy_flag = ''0'', sale_flag = ''0'',rate_flag = ''0''';
     try
       SqlDb.ExecSQL(UTF8Encode(Sqlstr));
-    except
-      Exit;
+    finally
+      SqlDb.Free;
     end;
   end;
 end;
 
 function GetStockNotice_filed(sStkcode, sFiledname: string): string;
 var
+  SqlDb: TSQLiteDatabase;
   SqlTb: TSQLiteTable;
-  TableCreateStr: string;
-  Sqlstr: string;
 begin
   Result := '0';
   SqlDb := TSQLiteDatabase.Create('stock.db');
@@ -135,21 +143,27 @@ begin
   end;
   if Result = '' then
     Result := '0';
+  SqlTb.Free;
+  SqlDb.Free;
 end;
 
-procedure ShowNotice(FMsg, Fstkcode, Ffiledname: string);
+procedure ShowNotice(FlblMsg, FMsg, Fstkcode, Ffiledname: string);
 var
+  SqlDb: TSQLiteDatabase;
   SqlTb: TSQLiteTable;
-  TableCreateStr: string;
   Sqlstr: string;
 begin
   SqlDb := TSQLiteDatabase.Create('stock.db');
   SqlTb := SqlDb.GetTable('select * from stock_notice where stkcode =' + QuotedStr(Fstkcode) + ' and ' + Ffiledname + ' = ''1''');
   if SqlTb.Count > 0 then
+  begin
+    SqlTb.Free;
+    SqlDb.Free;
     Exit;
+  end;
 
   //弹出窗口
-  ShowWarning(FMsg);
+  ShowMsg(FMsg,mkSysMsg,FlblMsg);
 
   //重置提醒标志
   Sqlstr := 'update stock_notice set ' + Ffiledname + '= ''1'' where stkcode =' + QuotedStr(Fstkcode);
@@ -158,6 +172,8 @@ begin
   except
     Exit;
   end;
+  SqlTb.Free;
+  SqlDb.Free;
 end;
 
 end.

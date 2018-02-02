@@ -229,7 +229,7 @@ begin
   begin
     sStkCode := Strgrid_stock.Cells[1, Rowindex];
     sStkName := Strgrid_stock.Cells[2, Rowindex];
-    sChosenPx := Strgrid_stock.Cells[6, Rowindex];
+    sChosenPx := Strgrid_stock.Cells[3, Rowindex];
     sMsg := sStkName + '(' + sStkCode + ')当前价：' + sChosenPx;
     frmNotice := TfrmNotice.Create(self);
     try
@@ -429,6 +429,7 @@ begin
   //获取选股策略
   GetStockType;
   bt_status(True);
+  SqlTb.Free;
 end;
 
 procedure TFrm_stockhq.bbStopClick(Sender: TObject);
@@ -1027,7 +1028,8 @@ var
   FNotice_Buyflag: string;
   FNotice_Saleflag: string;
   FNotice_Rateflag: string;
-  sMsg: string;
+  slblMsg: string; //弹窗标题
+  sMsg: string;    //弹窗内容
   sDate: string;
 begin
   sDate := FormatdateTime('yyyy-mm-dd hh:mm', now);
@@ -1036,23 +1038,23 @@ begin
   FNotice_Rateflag := GetStockNotice_filed(Fstkcode, 'stkrate');
   if (FNotice_Buyflag = '0') and (FNotice_Saleflag = '0') and (FNotice_Rateflag = '0') then
     Exit;
-
+  slblMsg :=  Fstkname + ':' + Fcurrent_Price;
   if (FNotice_Buyflag >= Fcurrent_Price) and (FNotice_Buyflag <> '0') then
   begin
-    sMsg := '自选股' + Fstkname + '(' + Fstkcode + ') 于' + sDate + ' 达到' + Fcurrent_Price + ',低于购买目标价' + FNotice_Buyflag + ',请及时关注';
-    ShowNotice(sMsg, Fstkcode, 'buy_flag');
+    sMsg := '自选股' + Fstkname + '(' + Fstkcode + ')于' + sDate + '达到' + Fcurrent_Price + ',低于购买目标价' + FNotice_Buyflag + #13#10 +'请及时关注';
+    ShowNotice(slblMsg,sMsg, Fstkcode, 'buy_flag');
   end;
 
-  if (FNotice_Saleflag <= Fcurrent_Price) and (FNotice_Saleflag <> '0')  then
+  if (FNotice_Saleflag <= Fcurrent_Price) and (FNotice_Saleflag <> '0') then
   begin
-    sMsg := '自选股' + Fstkname + '(' + Fstkcode + ') 于 ' + sDate + ' 达到' + Fcurrent_Price + ',超过卖出目标价' + FNotice_Saleflag+ ',请及时关注';
-    ShowNotice(sMsg, Fstkcode, 'sale_flag');
+    sMsg := '自选股' + Fstkname + '(' + Fstkcode + ')于 ' + sDate + '达到' + Fcurrent_Price + ',超过卖出目标价' + FNotice_Saleflag + #13#10 +'请及时关注';
+    ShowNotice(slblMsg, sMsg, Fstkcode, 'sale_flag');
   end;
 
   if (StrToFloat(FNotice_Rateflag) <= Abs(StrToFloat(Fchange_rate))) and (FNotice_Rateflag <> '0') then
   begin
-    sMsg := '自选股' + Fstkname + '(' + Fstkcode + ') 于 ' + sDate + ' 达到' + Fcurrent_Price + ',涨跌幅为' + Fchange_rate + '%,' + '超过' + FNotice_Rateflag + '%' + ',请及时关注';
-    ShowNotice(sMsg, Fstkcode, 'rate_flag');
+    sMsg := '自选股' + Fstkname + '(' + Fstkcode + ')于 ' + sDate + '达到' + Fcurrent_Price + ',涨跌幅为' + Fchange_rate + '%,' + '超过' + FNotice_Rateflag + '%' + #13#10 +'请及时关注';
+    ShowNotice(slblMsg, sMsg, Fstkcode, 'rate_flag');
   end;
 end;
 
@@ -1180,6 +1182,7 @@ begin
     else if (Change_amt < 0) then
       Frm_stockhq.dxStatusBar.Panels[5].PanelStyle.Font.Color := clGreen;
   end;
+  SqlTb.Free;
 end;
 
 end.

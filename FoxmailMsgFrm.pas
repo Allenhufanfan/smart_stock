@@ -5,7 +5,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ExtCtrls;
+  StdCtrls, ExtCtrls, dxGDIPlusClasses;
 
 const
   SInformation = 'ÌבÊ¾';
@@ -66,7 +66,8 @@ type
     property OnFormClick: TThreadMethod read FOnFormClick write FOnFormClick;
   end;
 
-procedure ShowMsg(const Info: string; Kind: TMsgKind = mkInfo; OnMsgFormClick: TThreadMethod=nil); overload;
+procedure ShowMsg(const Info: string; Kind: TMsgKind = mkInfo; FlblMsg: string
+    = ''; OnMsgFormClick: TThreadMethod = nil); overload;
 procedure ShowInfo(const Info: string);
 procedure ShowWarning(const Info: string);
 procedure ShowError(const Info: string);
@@ -103,14 +104,17 @@ begin
     TForm(ThisList.LockList.Items[iLoop]).Free;
 end;
 
-procedure ShowMsg(const Info: string; Kind: TMsgKind=mkInfo; OnMsgFormClick: TThreadMethod=nil);
+procedure ShowMsg(const Info: string; Kind: TMsgKind = mkInfo; FlblMsg: string
+    = ''; OnMsgFormClick: TThreadMethod = nil);
 var
   H: Integer;
 begin
   with TMsgForm.Create(nil) do
   begin
     OnFormClick := OnMsgFormClick;
-    Msg := '  ' + Info;
+    //Msg := '  ' + Info;
+    Msg := Info;
+    lblIcon.Caption := FlblMsg;
     MsgKind := Kind;
     MsgPos := ShowPos;
     H := CalcRect(lblMsg.Width, Info, nil).Bottom - lblMsg.Height;
@@ -356,28 +360,28 @@ begin
     mkError:
       begin
         imgError.Visible := True;
-        lblIcon.Caption := SError;
+        //lblIcon.Caption := SError;
         StartColor := ColorToRGB(ErrorStartColor);
         EndColor := ColorToRGB(ErrorEndColor);
       end;
     mkWarning:
       begin
         imgWarning.Visible := True;
-        lblIcon.Caption := SWarning;
+        //lblIcon.Caption := SWarning;
         StartColor := ColorToRGB(WarningStartColor);
         EndColor := ColorToRGB(WarningEndColor);
       end;
     mkSysMsg:
       begin
         imgSysMsg.Visible := True;
-        lblIcon.Caption := SSysMsg;
+        //lblIcon.Caption := SSysMsg;
         StartColor := ColorToRGB(InfoStartColor);
         EndColor := ColorToRGB(InfoEndColor);
       end;
   else
     begin
       imgInfo.Visible := True;
-      lblIcon.Caption := SInformation;
+      //lblIcon.Caption := SInformation;
       StartColor := ColorToRGB(InfoStartColor);
       EndColor := ColorToRGB(InfoEndColor);
     end;

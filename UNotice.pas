@@ -109,7 +109,9 @@ begin
       edtSale.Text := SqlTb.FieldAsString(SqlTb.FieldIndex['stksale']);
       edtRate.Text := SqlTb.FieldAsString(SqlTb.FieldIndex['stkrate']);
     end;
+    SqlTb.Free;
   end;
+  SqlDb.Free;
 end;
 
 end.
