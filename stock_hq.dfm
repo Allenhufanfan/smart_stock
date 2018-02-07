@@ -144,7 +144,7 @@ object Frm_stockhq: TFrm_stockhq
           Left = 1
           Top = 1
           Width = 581
-          Height = 325
+          Height = 336
           Margins.Right = 1
           Align = alClient
           ColCount = 4
@@ -163,14 +163,18 @@ object Frm_stockhq: TFrm_stockhq
           TabOrder = 0
           OnClick = Strgrid_stockClick
           OnDrawCell = Strgrid_stockDrawCell
+          ExplicitHeight = 325
         end
         object Panel6: TPanel
           Left = 582
           Top = 1
           Width = 205
-          Height = 325
+          Height = 336
           Align = alRight
           TabOrder = 1
+          ExplicitLeft = 586
+          ExplicitTop = -3
+          ExplicitHeight = 341
           object lbl_stock: TLabel
             AlignWithMargins = True
             Left = 4
@@ -194,11 +198,111 @@ object Frm_stockhq: TFrm_stockhq
             ParentFont = False
             ParentShowHint = False
             ShowHint = False
-            ExplicitWidth = 64
+            ExplicitTop = 5
+          end
+          object Label3: TLabel
+            Left = 16
+            Top = 291
+            Width = 35
+            Height = 16
+            Caption = #20170#24320':'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -13
+            Font.Name = 'Tahoma'
+            Font.Style = []
+            ParentFont = False
+          end
+          object Label4: TLabel
+            Left = 16
+            Top = 314
+            Width = 35
+            Height = 16
+            Caption = #26152#25910':'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -13
+            Font.Name = 'Tahoma'
+            Font.Style = []
+            ParentFont = False
+          end
+          object Label5: TLabel
+            Left = 108
+            Top = 291
+            Width = 35
+            Height = 16
+            Caption = #26368#39640':'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -13
+            Font.Name = 'Tahoma'
+            Font.Style = []
+            ParentFont = False
+          end
+          object Label6: TLabel
+            Left = 108
+            Top = 314
+            Width = 35
+            Height = 16
+            Caption = #26368#20302':'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -13
+            Font.Name = 'Tahoma'
+            Font.Style = []
+            ParentFont = False
+          end
+          object lbl_todayopen: TLabel
+            Left = 55
+            Top = 291
+            Width = 8
+            Height = 13
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -13
+            Font.Name = #23435#20307
+            Font.Style = [fsBold]
+            ParentFont = False
+          end
+          object lbl_close: TLabel
+            Left = 55
+            Top = 314
+            Width = 8
+            Height = 13
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -13
+            Font.Name = #23435#20307
+            Font.Style = [fsBold]
+            ParentFont = False
+          end
+          object lbl_high: TLabel
+            Left = 149
+            Top = 292
+            Width = 8
+            Height = 13
+            Font.Charset = GB2312_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -13
+            Font.Name = #23435#20307
+            Font.Style = [fsBold]
+            ParentFont = False
+          end
+          object lbl_low: TLabel
+            Left = 149
+            Top = 314
+            Width = 8
+            Height = 13
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -13
+            Font.Name = #23435#20307
+            Font.Style = [fsBold]
+            ParentFont = False
           end
           object StringGrid_wudang: TStringGrid
             Left = 3
-            Top = 36
+            Top = 31
             Width = 198
             Height = 255
             ColCount = 3
@@ -222,9 +326,9 @@ object Frm_stockhq: TFrm_stockhq
         end
         object Panel7: TPanel
           Left = 1
-          Top = 326
+          Top = 337
           Width = 786
-          Height = 229
+          Height = 218
           Align = alBottom
           TabOrder = 2
           Visible = False
@@ -232,9 +336,10 @@ object Frm_stockhq: TFrm_stockhq
             Left = 1
             Top = 1
             Width = 82
-            Height = 227
+            Height = 216
             Align = alLeft
             TabOrder = 0
+            ExplicitHeight = 227
             object btn_min: TButton
               Left = 3
               Top = 30
@@ -276,20 +381,22 @@ object Frm_stockhq: TFrm_stockhq
             Left = 83
             Top = 1
             Width = 702
-            Height = 227
+            Height = 216
             Align = alClient
             TabOrder = 1
+            ExplicitHeight = 227
             object WebBrowser: TWebBrowser
               Left = 1
               Top = 1
               Width = 700
-              Height = 225
+              Height = 214
               Align = alClient
               TabOrder = 0
               ExplicitLeft = 2
               ExplicitTop = 2
+              ExplicitHeight = 225
               ControlData = {
-                4C00000059480000411700000000000000000000000000000000000000000000
+                4C000000594800001E1600000000000000000000000000000000000000000000
                 000000004C000000000000000000000001000000E0D057007335CF11AE690800
                 2B2E12620E000000000000004C0000000114020000000000C000000000000046
                 8000000000000000000000000000000000000000000000000000000000000000

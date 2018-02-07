@@ -95,6 +95,14 @@ type
     WebBrowser: TWebBrowser;
     N3: TMenuItem;
     Act_Noitce: TAction;
+    Label3: TLabel;
+    Label4: TLabel;
+    Label5: TLabel;
+    Label6: TLabel;
+    lbl_todayopen: TLabel;
+    lbl_close: TLabel;
+    lbl_high: TLabel;
+    lbl_low: TLabel;
     procedure Act_AddExecute(Sender: TObject);
     procedure Act_browserExecute(Sender: TObject);
     procedure Act_DelExecute(Sender: TObject);
@@ -1152,6 +1160,28 @@ begin
     Frm_stockhq.StringGrid_wudang.Cells[1, 3] := Fstocprice_strs[25]; //卖三价格
     Frm_stockhq.StringGrid_wudang.Cells[1, 4] := Fstocprice_strs[23]; //卖二价格
     Frm_stockhq.StringGrid_wudang.Cells[1, 5] := Fstocprice_strs[21]; //卖一价格
+
+    //更新 昨收/今开/最高/最低价格
+    Frm_stockhq.lbl_close.Caption := Format('%.2f', [StrToFloat(Fstocprice_strs[2])]);
+    Frm_stockhq.lbl_todayopen.Caption := Format('%.2f', [StrToFloat(Fstocprice_strs[1])]);
+    Frm_stockhq.lbl_high.Caption := Format('%.2f', [StrToFloat(Fstocprice_strs[4])]);
+    Frm_stockhq.lbl_low.Caption := Format('%.2f', [StrToFloat(Fstocprice_strs[5])]);
+
+    //颜色
+    if (Fstocprice_strs[1] < Fstocprice_strs[2])  then
+       Frm_stockhq.lbl_todayopen.Font.Color := clGreen
+    else if (Fstocprice_strs[1] > Fstocprice_strs[2]) then
+       Frm_stockhq.lbl_todayopen.Font.Color := clRed;
+
+    if (Fstocprice_strs[4] < Fstocprice_strs[1])  then
+       Frm_stockhq.lbl_high.Font.Color := clGreen
+    else if (Fstocprice_strs[4] > Fstocprice_strs[2]) then
+       Frm_stockhq.lbl_high.Font.Color := clRed;
+
+    if (Fstocprice_strs[5] < Fstocprice_strs[2])  then
+       Frm_stockhq.lbl_low.Font.Color := clGreen
+    else if (Fstocprice_strs[5] > Fstocprice_strs[2]) then
+       Frm_stockhq.lbl_low.Font.Color := clRed;
   end;
 
   //提醒功能

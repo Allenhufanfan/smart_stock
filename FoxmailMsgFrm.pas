@@ -224,6 +224,8 @@ end;
 
 procedure TMsgForm.FormClick(Sender: TObject);
 begin
+  //点击弹窗时，响应关闭窗口
+  tmFadeOut.Enabled := True;
   if Assigned(FOnFormClick) then
   begin
     tmDelayTimer(Self);
@@ -299,7 +301,8 @@ procedure TMsgForm.tmDelayTimer(Sender: TObject);
 begin
   tmFadeIn.Enabled := False;
   tmDelay.Enabled := False;
-  tmFadeOut.Enabled := True;
+  //显示弹窗提醒后，不自动退出关闭
+  //tmFadeOut.Enabled := True;
 end;
 
 procedure TMsgForm.tmFadeOutTimer(Sender: TObject);

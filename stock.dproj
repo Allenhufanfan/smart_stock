@@ -88,7 +88,7 @@
 			<DCC_DebugInformation>false</DCC_DebugInformation>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
-			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=Kingdom-小AI有梦想;LegalTrademarks=;OriginalFilename=;ProductName=极速蜗牛;ProductVersion=1.1.0.0;Comments=</VerInfo_Keys>
+			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.2.0.0;InternalName=;LegalCopyright=Kingdom-小AI有梦想;LegalTrademarks=;OriginalFilename=;ProductName=极速蜗牛;ProductVersion=1.2.0.0;Comments=</VerInfo_Keys>
 			<DCC_ExeOutput>F:\git_project\smart_stock\</DCC_ExeOutput>
 			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
 			<VerInfo_Locale>1033</VerInfo_Locale>
@@ -109,6 +109,9 @@
 			<DCCReference Include="UNotice.pas">
 				<Form>frmNotice</Form>
 				<FormType>dfm</FormType>
+			</DCCReference>
+			<DCCReference Include="FoxmailMsgFrm.pas">
+				<Form>MsgForm</Form>
 			</DCCReference>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
