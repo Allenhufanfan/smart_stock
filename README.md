@@ -10,8 +10,7 @@
 # 2017-12-28
 增加sqlite数据库操作，右键增删改
 
-# 2017-12-28
-界面展示
+# 2018-08-27 界面展示
 ![image](https://github.com/Allenhufanfan/smart_stock/blob/master/sample1.png)
 ![image](https://github.com/Allenhufanfan/smart_stock/blob/master/sample2.png)
 ![image](https://github.com/Allenhufanfan/smart_stock/blob/master/sample3.png)
